@@ -1,5 +1,7 @@
 #inEditor
 
+![Alt text](https://github.com/ceroberoz/inEditor/blob/meong/capture.png "inEditor - Alpha Release")
+
 Simple text editor for LinkedIn posts.
 
 Made possible by Node & Quill + ChatGPT <3
