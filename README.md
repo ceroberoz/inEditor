@@ -1,5 +1,7 @@
 #inEditor
+
 Simple text editor for LinkedIn posts.
+
 Made possible by Node & Quill + ChatGPT <3
 
 ## How to run
