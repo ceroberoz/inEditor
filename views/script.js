@@ -2,7 +2,6 @@ const quill = new Quill(editor, {
   modules: {
     toolbar: [
       ['bold', 'italic', 'underline', 'strike'],
-      ['link', 'image'],
       ['clean']
     ]
   },
@@ -32,4 +31,30 @@ quill.on('text-change', (delta, oldDelta, source) => {
     textCounter.style.color = '#666';
     textCounter.textContent = `${length} / 3000`;
   }
+});
+
+// script.js
+document.getElementById('copy-button').addEventListener('click', function() {
+  // Get the content of the editor
+  var editorContent = document.getElementById('editor').innerHTML;
+
+  // Create a temporary element to hold the HTML content
+  var tempElement = document.createElement('div');
+  tempElement.innerHTML = editorContent;
+
+  // Append the temporary element to the body (off-screen)
+  document.body.appendChild(tempElement);
+
+  // Select and copy the content
+  var range = document.createRange();
+  range.selectNode(tempElement);
+  window.getSelection().removeAllRanges(); // Clear previous selections
+  window.getSelection().addRange(range);
+  document.execCommand('copy');
+
+  // Remove the temporary element
+  document.body.removeChild(tempElement);
+
+  // Optional: Notify the user
+  alert('Content copied to clipboard!');
 });
