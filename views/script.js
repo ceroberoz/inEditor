@@ -35,26 +35,15 @@ quill.on('text-change', (delta, oldDelta, source) => {
 
 // script.js
 document.getElementById('copy-button').addEventListener('click', function() {
-  // Get the content of the editor
-  var editorContent = document.getElementById('editor').innerHTML;
+  const text = quill.getText();
+  const textArea = document.createElement('textarea');
+  textArea.value = text;
 
-  // Create a temporary element to hold the HTML content
-  var tempElement = document.createElement('div');
-  tempElement.innerHTML = editorContent;
-
-  // Append the temporary element to the body (off-screen)
-  document.body.appendChild(tempElement);
-
-  // Select and copy the content
-  var range = document.createRange();
-  range.selectNode(tempElement);
-  window.getSelection().removeAllRanges(); // Clear previous selections
-  window.getSelection().addRange(range);
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.setSelectionRange(0, text.length);
   document.execCommand('copy');
+  document.body.removeChild(textArea);
 
-  // Remove the temporary element
-  document.body.removeChild(tempElement);
-
-  // Optional: Notify the user
-  alert('Content copied to clipboard!');
+  alert('Text copied to clipboard!');
 });
