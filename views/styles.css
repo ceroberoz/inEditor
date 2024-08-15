@@ -1,65 +1,96 @@
+/* styles.css */
+
+/* Set light green background for the entire body */
+body {
+  background-color: #d4edda;
+  margin: 0;
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Container styling */
 .container {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-gap: 10px;
+  flex: 1;
   padding: 20px;
+  max-width: 1400px; /* Increased max-width */
+  /* margin: 0 auto; */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
+/* Logo styling */
 .logo {
-  grid-column: 1 / 2;
-  background-color: #ccc;
-  height: 50px;
-  width: 50px;
-  margin-bottom: 10px;
+  height: 100px;
+  background: url('logo.png') no-repeat center;
+  background-size: contain;
+  margin-bottom: 20px;
 }
 
-.editor {
-  grid-column: 1 / 2;
-}
-
-#text-counter {
-  grid-column: 3 / 4;
-  font-size: 12px;
-  color: #666;
-  margin-top: 10px;
-  justify-self: end;
-}
-
+/* Service description styling */
 .service-description {
-  grid-column: 1 / 4;
-  margin-top: 20px;
+  margin-bottom: 20px;
+  font-size: 1.2em;
+  text-align: center;
 }
 
-.footer {
-  background-color: #f0f0f0;
+/* Quill editor styling */
+.editor {
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  min-height: 200px;
   padding: 10px;
-  text-align: center;
-  clear: both;
-  position: relative;
-  bottom: 0;
-  width: 100%;
-} 
+}
 
+/* Text counter styling */
+#text-counter {
+  text-align: right;
+  margin-top: 10px;
+  font-size: 0.9em;
+  color: #555;
+}
+
+/* Footer styling */
+.footer {
+  background-color: #f8f9fa;
+  text-align: center;
+  padding: 10px 0;
+  font-size: 0.9em;
+  border-top: 1px solid #ccc;
+}
+
+/* Responsive design */
 @media (max-width: 768px) {
   .container {
-    grid-template-columns: repeat(2, 1fr);
+    padding: 15px;
   }
+
+  .service-description {
+    font-size: 1em;
+  }
+  
   .editor {
-    grid-column: 1 / 2;
-  }
-  #text-counter {
-    grid-column: 2 / 3;
+    padding: 8px;
   }
 }
 
 @media (max-width: 480px) {
   .container {
-    grid-template-columns: 1fr;
+    padding: 10px;
   }
+
+  .logo {
+    height: 80px;
+  }
+
+  .service-description {
+    font-size: 0.9em;
+  }
+
   .editor {
-    grid-column: 1 / 2;
-  }
-  #text-counter {
-    grid-column: 1 / 2;
+    padding: 5px;
   }
 }
