@@ -6,7 +6,7 @@ Simple text editor for LinkedIn posts.
 
 Made possible by Node & Quill + ChatGPT <3
 
-**Live Demo** :https://ineditor.deno.dev/
+**Live Demo** : https://ineditor.deno.dev/
 
 ## How to run
 1. Clone this repo
