@@ -1,11 +1,12 @@
 const express = require('express');
+const path = require('path');
 const app = express();
 
 // Set up EJS as the templating engine
 app.set('view engine', 'ejs');
 
 // Serve static files from the public directory
-app.use(express.static('views'));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Render the index page
 app.get('/', (req, res) => {
