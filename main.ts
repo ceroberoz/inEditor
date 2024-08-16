@@ -1,12 +1,9 @@
-import { serve } from "https://deno.land/std@0.204.0/http/server.ts";
 import { dirname, fromFileUrl, join, extname } from "https://deno.land/std@0.204.0/path/mod.ts";
 import { renderFileToString } from "https://deno.land/x/dejs@0.10.3/mod.ts";
 
-// Get the current directory and file path
 const __filename = fromFileUrl(import.meta.url);
 const __dirname = dirname(__filename);
 
-// A helper function to determine the content type based on file extension
 function getContentType(filePath: string): string {
   const extension = extname(filePath);
   switch (extension) {
@@ -32,9 +29,7 @@ function getContentType(filePath: string): string {
   }
 }
 
-// Serve static files from the 'public' directory
-async function serveStatic(req: Request) {
-  const url = new URL(req.url);
+async function serveStatic(url: URL) {
   const filePath = join(__dirname, "public", url.pathname);
   
   try {
@@ -49,22 +44,19 @@ async function serveStatic(req: Request) {
   }
 }
 
-// Handle root route and render EJS view
 async function handleRequest(req: Request): Promise<Response> {
   const url = new URL(req.url);
   
   if (url.pathname === "/") {
-    // Render the EJS file as a string
     const html = await renderFileToString(join(__dirname, "views", "index.ejs"));
     return new Response(html, {
       headers: { "content-type": "text/html" },
     });
   } else {
-    // Serve static files
-    return serveStatic(req);
+    return serveStatic(url);
   }
 }
 
-// Start the server
-console.log("Server is running on port 8000");
-await serve(handleRequest, { port: 8000 });
+addEventListener("fetch", (event) => {
+  event.respondWith(handleRequest(event.request));
+});
