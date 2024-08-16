@@ -22,7 +22,7 @@ LinkedIn does not have built-in text editor on Post section. (Fact)
 
 Therefore for basic styling such as bold, italics, underline & strike text must be done by 3rd party app and I am not feeling OK by sharing my article without gods know what my article will be use for. (My worries) Is it for another AI feeds for same service? 
 
-Eww I only want text formatting bro. At least I can put *BOLD* or _ITALIC_ into my LinkedIn Posts. (Fact)
+Eww I only want text formatting bro. At least I can put **BOLD** or _ITALIC_ into my LinkedIn Posts. (Fact)
 
 ---
 
