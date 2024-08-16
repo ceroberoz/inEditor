@@ -27,12 +27,21 @@ Eww I only want text formatting bro. At least I can put **BOLD** or _ITALIC_ int
 ---
 
 ### Alpha release ####
-As of now only Bold & Copy function that working.
+Good news! As of now only Bold, **Italic**, **Underline**, **Strike** & Copy function that working.
 
 Other function are either WIP or will be remove in the future.
 
 ---
 
-*Known issue:*
-- Italics: some unicode cause AWOL during text selection; avoid use Italic on e, g, E, G, R.
-- Underline & strike styling done by CSS.
+**Known issue:**
+Anything beside mentioned above does not work yet. 
+
+**TODO:**
+- Font selection : Progress
+- Size selection : To be remove since Unicode does not support font size 
+- Header selection : To be remove, can be subtitute by bold
+- List (Ordered & Bullet) : TODO
+- Indent : to be remove
+- Align : to be remove, default by left-align
+- Link & image : to be remove, you can use LinkedIn Link & Image attach feature
+- Clean : to be remove, cannot undo replaced texts
