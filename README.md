@@ -1,47 +1,39 @@
-# inEditor
+# inEditor: Your LinkedIn Post Buddy! 📝✨
 
-![Alt text](https://github.com/ceroberoz/inEditor/blob/meong/capture.png "inEditor - Alpha Release")
+![inEditor in action](https://github.com/ceroberoz/inEditor/blob/meong/capture.png "inEditor - Alpha Release")
 
-Simple text editor for LinkedIn posts.
+Hey there, LinkedIn enthusiasts! 👋 Tired of plain, boring posts? Say hello to inEditor - your new best friend for crafting eye-catching LinkedIn posts!
 
-Made possible by Node & Quill + ChatGPT <3
+**Check it out live**: https://ineditor.deno.dev/
 
-**Live Demo** : https://ineditor.deno.dev/
+## What's the fuss about?
+LinkedIn doesn't have a built-in text editor for posts (boo! 👎). But fear not! inEditor is here to save the day, letting you add some pizzazz to your posts with **bold**, *italic*, underlined, and ~~strikethrough~~ text. No more boring posts for you!
 
-## How to run
-1. Clone this repo
-2. Go to cloned-repo folder
-3. Run ```node install``` to install node_modules dependancy
-4. Run ```node index.js``` to run the service
-5. Open ```http://localhost:3000``` to open 
+## Getting Started (It's super easy!)
+1. Clone this repo (you know the drill!)
+2. Hop into the folder
+3. Run `npm install` to get all the goodies
+4. Fire it up with `node index.js`
+5. Open `http://localhost:3000` and start styling!
+
+## Current Superpowers (Alpha Release)
+- **Bold**: Make your words stand out! 💪
+- *Italic*: Add some flair and emphasis!
+- Underline: Because sometimes you need to underline stuff
+- ~~Strikethrough~~: For when you change your mind mid-sentence
+- Copy function: Easy peasy copy-paste!
+
+## What's Cooking?
+We're working on making inEditor even more awesome! Some features are in the works, while others might be saying goodbye. Stay tuned for updates!
+
+## Known Quirks
+Right now, only the features mentioned above are working their magic. The rest are either on vacation or getting a makeover.
+
+## Help Us Grow!
+Love inEditor? Have ideas to make it even better? We'd love to hear from you! Feel free to contribute, suggest features, or just say hi!
 
 ---
 
-## Why & how its works
-LinkedIn does not have built-in text editor on Post section. (Fact)
+Made with ❤️ using Node, Quill, and a sprinkle of ChatGPT magic!
 
-Therefore for basic styling such as bold, italics, underline & strike text must be done by 3rd party app and I am not feeling OK by sharing my article without gods know what my article will be use for. (My worries) Is it for another AI feeds for same service? 
-
-Eww I only want text formatting bro. At least I can put **BOLD** or _ITALIC_ into my LinkedIn Posts. (Fact)
-
----
-
-### Alpha release ####
-Good news! As of now only Bold, **Italic**, **Underline**, **Strike** & Copy function that working.
-
-Other function are either WIP or will be remove in the future.
-
----
-
-**Known issue:**
-Anything beside mentioned above does not work yet. 
-
-**TODO:**
-- Font selection : Progress
-- Size selection : To be remove since Unicode does not support font size 
-- Header selection : To be remove, can be subtitute by bold
-- List (Ordered & Bullet) : TODO
-- Indent : to be remove
-- Align : to be remove, default by left-align
-- Link & image : to be remove, you can use LinkedIn Link & Image attach feature
-- Clean : to be remove, cannot undo replaced texts
+Happy posting, LinkedIn rockstars! 🌟
