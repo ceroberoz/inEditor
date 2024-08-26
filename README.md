@@ -22,12 +22,22 @@ LinkedIn doesn't have a built-in text editor for posts (boo! 👎). But fear not
 - Underline: Because sometimes you need to underline stuff
 - ~~Strikethrough~~: For when you change your mind mid-sentence
 - Copy function: Easy peasy copy-paste!
+- Numbered lists: Organize your thoughts in order
+- Bullet points: Perfect for quick, easy-to-read lists
+
+## What's New?
+We've added some exciting new features to make your posts even more engaging:
+
+1. **Numbered Lists**: Great for step-by-step instructions or prioritized points.
+2. **Bullet Points**: Ideal for unordered lists or highlighting key ideas.
+
+These additions will help you structure your content more effectively and make your posts easier to read and understand.
 
 ## What's Cooking?
-We're working on making inEditor even more awesome! Some features are in the works, while others might be saying goodbye. Stay tuned for updates!
+We're constantly working on improving inEditor. Some features are in development, while others might be refined or removed based on user feedback. Stay tuned for updates!
 
 ## Known Quirks
-Right now, only the features mentioned above are working their magic. The rest are either on vacation or getting a makeover.
+Currently, only the features mentioned above are fully functional. We're working on perfecting other features and ironing out any kinks.
 
 ## Help Us Grow!
 Love inEditor? Have ideas to make it even better? We'd love to hear from you! Feel free to contribute, suggest features, or just say hi!
