@@ -7,26 +7,14 @@ var quill = new Quill("#editor", {
       [{ size: [] }],
       ["bold", "italic", "underline", "strike"],
       [{ header: [1, 2, 3, 4, 5, 6, false] }],
-      // [{ list: "ordered" }, { list: "bullet" }],
-      // [{ indent: "-1" }, { indent: "+1" }],
-      // [{ align: [] }],
-      // ["link", "image"],
-      // ["clean"], // add other buttons as needed
+      [{ list: "ordered" }, { list: "bullet" }],
+      [{ indent: "-1" }, { indent: "+1" }],
+      [{ align: [] }],
+      ["link", "image"],
+      ["clean"], // add other buttons as needed
     ],
   },
 });
-
-// Helper fucntion to replace selected text with Bullet and Ordered list
-function replaceWithBulletList(text) {
-  return "• " + text.replace(/\n/g, "\n• ");
-}
-
-function replaceWithOrderedList(text) {
-  return text
-    .split("\n")
-    .map((line, index) => `${index + 1}. ${line}`)
-    .join("\n");
-}
 
 // Helper function to replace selected text with bold Unicode
 function replaceWithBoldUnicode(text) {
@@ -319,32 +307,6 @@ function replaceWithStrikeTextUnicode(text) {
     .map((char) => strikeThroughMap[char] || char + "\u0335")
     .join("");
 }
-
-// Override the bullet list button behavior
-toolbar.addHandler("list", function (value) {
-  if (value === "bullet") {
-    const selection = quill.getSelection();
-    if (selection) {
-      const selectedText = quill.getText(selection.index, selection.length);
-      const bulletListText = replaceWithBulletList(selectedText);
-      quill.deleteText(selection.index, selection.length);
-      quill.insertText(selection.index, bulletListText);
-    }
-  }
-});
-
-// Override the ordered list button behavior
-toolbar.addHandler("list", function (value) {
-  if (value === "ordered") {
-    const selection = quill.getSelection();
-    if (selection) {
-      const selectedText = quill.getText(selection.index, selection.length);
-      const orderedListText = replaceWithOrderedList(selectedText);
-      quill.deleteText(selection.index, selection.length);
-      quill.insertText(selection.index, orderedListText);
-    }
-  }
-});
 
 // Override the bold button behavior
 const toolbar = quill.getModule("toolbar");
