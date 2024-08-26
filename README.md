@@ -35,24 +35,3 @@ Love inEditor? Have ideas to make it even better? We'd love to hear from you! Fe
 ---
 
 Made with ❤️ using Node, Quill, and a sprinkle of ChatGPT magic!
-
-<<<<<<< HEAD
-Happy posting, LinkedIn rockstars! 🌟
-=======
-Therefore for basic styling such as bold, italics, underline & strike text must be done by 3rd party app and I am not feeling OK by sharing my article without gods know what my article will be use for. (My worries) Is it for another AI feeds for same service? 
-
-Eww I only want text formatting bro. At least I can put **BOLD** or _ITALIC_ into my LinkedIn Posts. (Fact)
-
----
-
-### Alpha release ####
-As of now only Bold & Copy function that working.
-
-Other function are either WIP or will be remove in the future.
-
----
-
-*Known issue:*
-- Italics: some unicode cause AWOL during text selection; avoid use Italic on e, g, E, G, R.
-- Underline & strike styling done by CSS.
->>>>>>> parent of db82bd9 (meong)

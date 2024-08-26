@@ -31,7 +31,6 @@ function replaceWithOrderedList(text) {
 // Helper function to replace selected text with bold Unicode
 function replaceWithBoldUnicode(text) {
   const boldUnicodeMap = {
-<<<<<<< HEAD
     a: "𝗮",
     b: "𝗯",
     c: "𝗰",
@@ -95,16 +94,6 @@ function replaceWithBoldUnicode(text) {
     8: "𝟴",
     9: "𝟵",
     " ": " ",
-=======
-    'a': '𝗮', 'b': '𝗯', 'c': '𝗰', 'd': '𝗱', 'e': '𝗲', 'f': '𝗳', 'g': '𝗴', 'h': '𝗵', 'i': '𝗶', 'j': '𝗷',
-    'k': '𝗸', 'l': '𝗹', 'm': '𝗺', 'n': '𝗻', 'o': '𝗼', 'p': '𝗽', 'q': '𝗾', 'r': '𝗿', 's': '𝘀', 't': '𝘁',
-    'u': '𝘂', 'v': '𝘃', 'w': '𝘄', 'x': '𝘅', 'y': '𝘆', 'z': '𝘇',
-    'A': '𝗔', 'B': '𝗕', 'C': '𝗖', 'D': '𝗗', 'E': '𝗘', 'F': '𝗙', 'G': '𝗚', 'H': '𝗛', 'I': '𝗜', 'J': '𝗝',
-    'K': '𝗞', 'L': '𝗟', 'M': '𝗠', 'N': '𝗡', 'O': '𝗢', 'P': '𝗣', 'Q': '𝗤', 'R': '𝗥', 'S': '𝗦', 'T': '𝗧',
-    'U': '𝗨', 'V': '𝗩', 'W': '𝗪', 'X': '𝗫', 'Y': '𝗬', 'Z': '𝗭',
-    '0': '𝟎', '1': '𝟏', '2': '𝟐', '3': '𝟑', '4': '𝟒', '5': '𝟓', '6': '𝟔', '7': '𝟕', '8': '𝟖', '9': '𝟗',
-    ' ': ' '
->>>>>>> parent of db82bd9 (meong)
   };
   return text
     .split("")
@@ -115,7 +104,6 @@ function replaceWithBoldUnicode(text) {
 // Helper function to replace selected text with italic Unicode
 function replaceWithItalicUnicode(text) {
   const italicUnicodeMap = {
-<<<<<<< HEAD
     a: "𝒶",
     b: "𝒷",
     c: "𝒸",
@@ -184,23 +172,10 @@ function replaceWithItalicUnicode(text) {
     .split("")
     .map((char) => italicUnicodeMap[char] || char)
     .join("");
-=======
-    'a': '𝒶', 'b': '𝒷', 'c': '𝒸', 'd': '𝒹', 'e': '𝒺', 'f': '𝒻', 'g': '𝒼', 'h': '𝒽', 'i': '𝒾', 'j': '𝒿',
-    'k': '𝓀', 'l': '𝓁', 'm': '𝓂', 'n': '𝓃', 'o': '𝑜', 'p': '𝓅', 'q': '𝓆', 'r': '𝓇', 's': '𝓈', 't': '𝓉',
-    'u': '𝓊', 'v': '𝓋', 'w': '𝓌', 'x': '𝓍', 'y': '𝓎', 'z': '𝓏',
-    'A': '𝒜', 'B': '𝒷', 'C': '𝒸', 'D': '𝒹', 'E': '𝒺', 'F': '𝒻', 'G': '𝒼', 'H': '𝒽', 'I': '𝒾', 'J': '𝒿',
-    'K': '𝒦', 'L': '𝒫', 'M': '𝒩', 'N': '𝒩', 'O': '𝒪', 'P': '𝒫', 'Q': '𝒬', 'R': '𝒭', 'S': '𝒮', 'T': '𝒯',
-    'U': '𝒰', 'V': '𝒱', 'W': '𝒲', 'X': '𝒳', 'Y': '𝒴', 'Z': '𝒵',
-    '0': '𝟎', '1': '𝟏', '2': '𝟐', '3': '𝟑', '4': '𝟒', '5': '𝟓', '6': '𝟔', '7': '𝟕', '8': '𝟖', '9': '𝟗',
-    ' ': ' '
-  };
-  return text.split('').map(char => italicUnicodeMap[char] || char).join('');
->>>>>>> parent of db82bd9 (meong)
 }
 
 // Helper function to replace selected text with underline Unicode
 function replaceWithUnderlineUnicode(text) {
-<<<<<<< HEAD
   const underlineUnicodeMap = {
     a: "a̲",
     b: "b̲",
@@ -343,16 +318,6 @@ function replaceWithStrikeTextUnicode(text) {
     .split("")
     .map((char) => strikeThroughMap[char] || char + "\u0335")
     .join("");
-=======
-  // Unicode does not support direct underline mapping, so we use CSS for underlining
-  return text; // Apply underline styling via CSS instead
-}
-
-// Helper function to replace selected text with strikethrough Unicode
-function replaceWithStrikethroughUnicode(text) {
-  // Unicode does not support direct strikethrough mapping, so we use CSS for strikethrough
-  return text; // Apply strikethrough styling via CSS instead
->>>>>>> parent of db82bd9 (meong)
 }
 
 // Override the bullet list button behavior
@@ -409,14 +374,9 @@ toolbar.addHandler("underline", function () {
   const selection = quill.getSelection();
   if (selection) {
     const selectedText = quill.getText(selection.index, selection.length);
-<<<<<<< HEAD
     const underlineText = replaceWithUnderlineUnicode(selectedText);
     quill.deleteText(selection.index, selection.length);
     quill.insertText(selection.index, underlineText, "underline");
-=======
-    // Apply underline styling via CSS
-    quill.formatText(selection.index, selection.length, 'underline', true);
->>>>>>> parent of db82bd9 (meong)
   }
 });
 
@@ -425,19 +385,11 @@ toolbar.addHandler("strike", function () {
   const selection = quill.getSelection();
   if (selection) {
     const selectedText = quill.getText(selection.index, selection.length);
-<<<<<<< HEAD
     const strikeText = replaceWithStrikeTextUnicode(selectedText);
     quill.deleteText(selection.index, selection.length);
     quill.insertText(selection.index, strikeText, "strike");
-=======
-    // Apply strikethrough styling via CSS
-    quill.formatText(selection.index, selection.length, 'strike', true);
->>>>>>> parent of db82bd9 (meong)
   }
 });
-
-
-
 
 // Add text counter
 const textCounter = document.getElementById("text-counter");
