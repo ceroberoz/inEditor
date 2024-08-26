@@ -6,12 +6,12 @@ var quill = new Quill("#editor", {
       [{ font: [] }],
       [{ size: [] }],
       ["bold", "italic", "underline", "strike"],
-      [{ header: [1, 2, 3, 4, 5, 6, false] }],
+      // [{ header: [1, 2, 3, 4, 5, 6, false] }],
       [{ list: "ordered" }, { list: "bullet" }],
       [{ indent: "-1" }, { indent: "+1" }],
       [{ align: [] }],
-      ["link", "image"],
-      ["clean"], // add other buttons as needed
+      // ["link", "image"],
+      // ["clean"], // add other buttons as needed
     ],
   },
 });
@@ -308,6 +308,34 @@ function replaceWithStrikeTextUnicode(text) {
     .join("");
 }
 
+// Helper function to replace selected text with ordered list Unicode
+function replaceWithOrderedListUnicode(text) {
+  const orderedListUnicodeMap = {
+    1: "➀",
+    2: "➁",
+    3: "➂",
+    4: "➃",
+    5: "➄",
+    6: "➅",
+    7: "➆",
+    8: "➇",
+    9: "➈",
+    0: "➉",
+    ".": ".",
+    " ": " ",
+  };
+  return text
+    .split("")
+    .map((char) => orderedListUnicodeMap[char] || char)
+    .join("");
+}
+
+// Helper function to replace selected text with bullet list Unicode
+function replaceWithBulletListUnicode(text) {
+  const bulletUnicode = "•";
+  return bulletUnicode + " " + text;
+}
+
 // Override the bold button behavior
 const toolbar = quill.getModule("toolbar");
 toolbar.addHandler("bold", function () {
@@ -350,6 +378,35 @@ toolbar.addHandler("strike", function () {
     const strikeText = replaceWithStrikeTextUnicode(selectedText);
     quill.deleteText(selection.index, selection.length);
     quill.insertText(selection.index, strikeText, "strike");
+  }
+});
+
+// Override the ordered list button behavior
+toolbar.addHandler("list", function (value) {
+  if (value === "ordered") {
+    const selection = quill.getSelection();
+    if (selection) {
+      const selectedText = quill.getText(selection.index, selection.length);
+      const lines = selectedText.split("\n");
+      const orderedListText = lines
+        .map((line, index) =>
+          replaceWithOrderedListUnicode(`${index + 1}. ${line}`),
+        )
+        .join("\n");
+      quill.deleteText(selection.index, selection.length);
+      quill.insertText(selection.index, orderedListText);
+    }
+  } else if (value === "bullet") {
+    const selection = quill.getSelection();
+    if (selection) {
+      const selectedText = quill.getText(selection.index, selection.length);
+      const lines = selectedText.split("\n");
+      const bulletListText = lines
+        .map((line) => replaceWithBulletListUnicode(line))
+        .join("\n");
+      quill.deleteText(selection.index, selection.length);
+      quill.insertText(selection.index, bulletListText);
+    }
   }
 });
 
