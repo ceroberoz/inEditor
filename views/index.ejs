@@ -3,9 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Single Page App</title>
+  <title>inEditor - Simple Text Editor for LinkedIn Posts</title>
+
+  <!-- Meta tags for SEO and social media sharing -->
+  <meta name="description" content="Simple text editor for LinkedIn posts">
+  <meta name="keywords" content="text editor, LinkedIn, posts">
+  <meta name="author" content="Perdana Hadi">
+  <meta property="og:title" content="inEditor - Simple Text Editor for LinkedIn Posts">
+  <meta property="og:description" content="Create and format your LinkedIn posts easily">
+  <meta property="og:url" content="https://ineditor.deno.dev">
+
+  <!-- Favicon -->
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+
+  <!-- Preconnect for quilljs -->
+  <link rel="preconnect" href="https://cdn.quilljs.com">
+
+  <!-- Stylesheets -->
   <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css"> <!-- Link to your external CSS file -->
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Content Security Policy -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.quilljs.com; style-src 'self' https://cdn.quilljs.com;">
 </head>
 <body>
   <div class="container">
@@ -19,7 +38,7 @@
       <p>Some initial <strong>bold</strong> text</p>
       <p><br /></p>
     </div>
-    <button id="copy-button">Copy</button>
+    <button id="copy-button" aria-label="Copy text">Copy</button>
 
     <div id="text-counter"></div>
   </div>
@@ -30,8 +49,14 @@
     <p>Created with ❤️ by <a href="https://github.com/ceroberoz" target="_blank">Perdana Hadi</a>.</p>
   </footer>
 
+  <!-- No Script message -->
+  <noscript>
+    <p>This application requires JavaScript to function properly. Please enable JavaScript in your browser settings.</p>
+  </noscript>
 
-  <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
-  <script src="script.js"></script>
+  <!-- Scripts -->
+  <script src="https://cdn.quilljs.com/1.3.6/quill.js" defer></script>
+  <script src="script.js" defer></script>
+
 </body>
 </html>
