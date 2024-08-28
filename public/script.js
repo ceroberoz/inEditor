@@ -27,7 +27,10 @@ try {
   });
 } catch (error) {
   console.error("Failed to initialize Quill:", error);
-  alert("Failed to initialize the text editor. Please refresh the page.");
+  const editorElement = document.getElementById("editor");
+  if (editorElement) {
+    editorElement.innerHTML = '<p class="text-red-500">Failed to initialize the text editor. Please refresh the page or check your internet connection.</p>';
+  }
 }
 
 // Text formatting functions
@@ -106,12 +109,16 @@ quill.on("text-change", (delta, oldDelta, source) => {
   }
 
   const newText = `${length} / ${MAX_TEXT_LENGTH}`;
-  if (textCounter.textContent !== newText) {
-    textCounter.textContent = newText;
-    textCounter.style.color = length > MAX_TEXT_LENGTH ? "red" : "#666";
-    if (length > MAX_TEXT_LENGTH) {
-      textCounter.textContent += " (Maximum reached)";
-    }
+  textCounter.textContent = newText;
+  
+  if (length > MAX_TEXT_LENGTH) {
+    textCounter.classList.add("text-red-500");
+    textCounter.textContent += " (Maximum reached)";
+  } else if (length > MAX_TEXT_LENGTH * 0.9) {
+    textCounter.classList.add("text-yellow-500");
+    textCounter.textContent += " (Approaching limit)";
+  } else {
+    textCounter.classList.remove("text-red-500", "text-yellow-500");
   }
 });
 
@@ -120,14 +127,34 @@ async function copyToClipboard() {
   try {
     const plainText = quill.getText();
     await navigator.clipboard.writeText(plainText);
-    alert("Text copied to clipboard!");
+    const copyButton = document.getElementById("copy-button");
+    copyButton.textContent = "Copied!";
+    copyButton.classList.add("bg-green-500");
+    setTimeout(() => {
+      copyButton.textContent = "Copy";
+      copyButton.classList.remove("bg-green-500");
+    }, 2000);
   } catch (err) {
     console.error("Failed to copy: ", err);
-    alert("Failed to copy text. Please try again.");
+    alert("Failed to copy text. Please try again or copy manually.");
   }
 }
 
 // Add event listener to the copy button
 document.getElementById("copy-button").addEventListener("click", () => {
   copyToClipboard().catch(console.error);
+});
+
+// Info tooltip functionality
+const infoButton = document.getElementById('info-button');
+const infoTooltip = document.getElementById('info-tooltip');
+
+infoButton.addEventListener('click', () => {
+  infoTooltip.classList.toggle('hidden');
+});
+
+document.addEventListener('click', (event) => {
+  if (!infoButton.contains(event.target) && !infoTooltip.contains(event.target)) {
+    infoTooltip.classList.add('hidden');
+  }
 });

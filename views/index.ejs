@@ -28,24 +28,87 @@
 
   <!-- Content Security Policy -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.quilljs.com https://cdn.tailwindcss.com; style-src 'self' https://cdn.quilljs.com 'unsafe-inline';">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          zIndex: {
+            '100': '100',
+          }
+        }
+      }
+    }
+  </script>
+  <style type="text/css">
+    .tooltip-enter {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    .tooltip-enter-active {
+      opacity: 1;
+      transform: scale(1);
+      transition: opacity 300ms, transform 300ms;
+    }
+    .tooltip-exit {
+      opacity: 1;
+    }
+    .tooltip-exit-active {
+      opacity: 0;
+      transform: scale(0.9);
+      transition: opacity 300ms, transform 300ms;
+    }
+  
+    #info-tooltip::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      right: 10px;
+      border-width: 10px 10px 0;
+      border-style: solid;
+      border-color: white transparent transparent transparent;
+      filter: drop-shadow(0 2px 1px rgba(0,0,0,0.1));
+    }
+  </style>
 </head>
 <body class="bg-green-100 flex flex-col min-h-screen">
   <div class="container mx-auto px-4 py-8 flex-grow flex flex-col justify-center max-w-2xl">
-    <header class="mb-8">
-      <div class="h-24 bg-contain bg-no-repeat bg-center mb-4" style="background-image: url('logo.png');"></div>
-      <div class="text-center text-lg">
-        <p>Simple text editor for LinkedIn posts.</p>
-      </div>
+    <header class="mb-8" role="banner">
+      <div class="h-24 bg-contain bg-no-repeat bg-center mb-4" style="background-image: url('logo.png');" aria-label="inEditor logo"></div>
+      <h1 class="text-center text-lg">Simple text editor for LinkedIn posts.</h1>
     </header>
-    <main>
-      <div id="editor" class="bg-white border border-gray-300 rounded-lg min-h-[200px] p-4 mb-4" aria-label="Text editor for LinkedIn posts">
-        <p>Hello World!</p>
-        <p>Some initial <strong>bold</strong> text</p>
-        <p><br /></p>
-      </div>
+    <main role="main">
+      <div id="editor" class="bg-white border border-gray-300 rounded-lg min-h-[200px] p-4 mb-4" aria-label="Text editor for LinkedIn posts"></div>
       <div class="flex items-center justify-between mb-4">
-        <button id="copy-button" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded w-[70%]" aria-label="Copy text">Copy</button>
-        <div id="text-counter" class="text-right text-sm text-gray-600 w-[28%] border border-gray-300 rounded p-2 bg-white">0 / 3000</div>
+        <button id="copy-button" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded w-[70%]" aria-label="Copy text to clipboard">Copy</button>
+        <div class="relative w-[28%]">
+          <div class="flex items-center">
+            <div id="text-counter" class="text-right text-sm text-gray-600 border border-gray-300 rounded-l p-2 bg-white flex-grow" aria-live="polite">0 / 3000</div>
+            <button id="info-button" class="bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-r p-2" aria-label="Character limit information">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+              </svg>
+            </button>
+          </div>
+          <div id="info-tooltip" class="hidden absolute right-0 bottom-full mb-2 w-64 bg-white border border-gray-300 rounded-lg shadow-lg p-4 z-10">
+            <h3 class="font-bold mb-2">LinkedIn Character Limits</h3>
+            <ul class="text-xs">
+              <li><strong>Profile:</strong></li>
+              <li>- About: 2600 characters</li>
+              <li>- Experience description: 2000 characters</li>
+              <li>- Publication description: 2000 characters</li>
+              <li><strong>Content:</strong></li>
+              <li>- Comment: 1250 characters</li>
+              <li>- Article body text: 110000 characters</li>
+              <li>- Post: 3000 characters</li>
+              <li>- Recommendation: 3000 characters</li>
+              <li><strong>Messages:</strong></li>
+              <li>- Connection message: 300 characters</li>
+              <li>- Message to connections, via events/groups: 8000 characters</li>
+              <li>- InMail body: 2000 characters</li>
+            </ul>
+          </div>
+        </div>
       </div>
     </main>
   </div>
