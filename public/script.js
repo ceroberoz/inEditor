@@ -97,7 +97,7 @@ Object.entries(toolbarHandlers).forEach(([format, handler]) => {
 const textCounter = document.getElementById("text-counter");
 quill.on("text-change", (delta, oldDelta, source) => {
   const text = quill.getText();
-  const length = text.length;
+  const length = text.length - 1; // Subtract 1 to account for the newline character Quill adds
 
   if (length > MAX_TEXT_LENGTH && source === "user") {
     if (delta.ops[0].insert) {
@@ -105,10 +105,13 @@ quill.on("text-change", (delta, oldDelta, source) => {
     }
   }
 
-  textCounter.textContent = `${length} / ${MAX_TEXT_LENGTH}`;
-  textCounter.style.color = length > MAX_TEXT_LENGTH ? "red" : "#666";
-  if (length > MAX_TEXT_LENGTH) {
-    textCounter.textContent += " (Maximum reached)";
+  const newText = `${length} / ${MAX_TEXT_LENGTH}`;
+  if (textCounter.textContent !== newText) {
+    textCounter.textContent = newText;
+    textCounter.style.color = length > MAX_TEXT_LENGTH ? "red" : "#666";
+    if (length > MAX_TEXT_LENGTH) {
+      textCounter.textContent += " (Maximum reached)";
+    }
   }
 });
 
