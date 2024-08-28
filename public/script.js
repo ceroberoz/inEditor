@@ -6,170 +6,113 @@ import {
   orderedListUnicodeMap,
 } from "./unicodeMaps.js";
 
+// Configuration
+const MAX_TEXT_LENGTH = 3000;
+
 // Initialize Quill editor
-var quill = new Quill("#editor", {
-  theme: "snow",
-  modules: {
-    toolbar: [
-      [{ font: [] }],
-      [{ size: [] }],
-      ["bold", "italic", "underline", "strike"],
-      // [{ header: [1, 2, 3, 4, 5, 6, false] }],
-      [{ list: "ordered" }, { list: "bullet" }],
-      [{ indent: "-1" }, { indent: "+1" }],
-      [{ align: [] }],
-      // ["link", "image"],
-      // ["clean"], // add other buttons as needed
-    ],
+let quill;
+try {
+  quill = new Quill("#editor", {
+    theme: "snow",
+    modules: {
+      toolbar: [
+        [{ font: [] }],
+        [{ size: [] }],
+        ["bold", "italic", "underline", "strike"],
+        [{ list: "ordered" }, { list: "bullet" }],
+        [{ indent: "-1" }, { indent: "+1" }],
+        [{ align: [] }],
+      ],
+    },
+  });
+} catch (error) {
+  console.error("Failed to initialize Quill:", error);
+  alert("Failed to initialize the text editor. Please refresh the page.");
+}
+
+// Text formatting functions
+const formatText = (text, unicodeMap) =>
+  text
+    .split("")
+    .map((char) => unicodeMap[char] || char)
+    .join("");
+
+const replaceWithBoldUnicode = (text) => formatText(text, boldUnicodeMap);
+const replaceWithItalicUnicode = (text) => formatText(text, italicUnicodeMap);
+const replaceWithUnderlineUnicode = (text) =>
+  formatText(text, underlineUnicodeMap);
+const replaceWithStrikeTextUnicode = (text) =>
+  formatText(text, strikeThroughMap);
+const replaceWithOrderedListUnicode = (text) =>
+  formatText(text, orderedListUnicodeMap);
+const replaceWithBulletListUnicode = (text) => "• " + text;
+
+// Toolbar handlers
+const toolbarHandlers = {
+  bold: () => applyFormatting(replaceWithBoldUnicode, "bold"),
+  italic: () => applyFormatting(replaceWithItalicUnicode, "italic"),
+  underline: () => applyFormatting(replaceWithUnderlineUnicode, "underline"),
+  strike: () => applyFormatting(replaceWithStrikeTextUnicode, "strike"),
+  list: (value) => {
+    if (value === "ordered") {
+      applyListFormatting(replaceWithOrderedListUnicode);
+    } else if (value === "bullet") {
+      applyListFormatting(replaceWithBulletListUnicode);
+    }
   },
-});
+};
 
-// Helper function to replace selected text with bold Unicode
-function replaceWithBoldUnicode(text) {
-  return text
-    .split("")
-    .map((char) => boldUnicodeMap[char] || char)
-    .join("");
+// Apply formatting to selected text
+function applyFormatting(formatFunction, formatType) {
+  const selection = quill.getSelection();
+  if (selection) {
+    const selectedText = quill.getText(selection.index, selection.length);
+    const formattedText = formatFunction(selectedText);
+    quill.deleteText(selection.index, selection.length);
+    quill.insertText(selection.index, formattedText, formatType);
+  }
 }
 
-// Helper function to replace selected text with italic Unicode
-function replaceWithItalicUnicode(text) {
-  return text
-    .split("")
-    .map((char) => italicUnicodeMap[char] || char)
-    .join("");
+// Apply list formatting
+function applyListFormatting(formatFunction) {
+  const selection = quill.getSelection();
+  if (selection) {
+    const selectedText = quill.getText(selection.index, selection.length);
+    const lines = selectedText.split("\n");
+    const formattedText = lines
+      .map((line, index) => formatFunction(`${index + 1}. ${line}`))
+      .join("\n");
+    quill.deleteText(selection.index, selection.length);
+    quill.insertText(selection.index, formattedText);
+  }
 }
 
-// Helper function to replace selected text with underline Unicode
-function replaceWithUnderlineUnicode(text) {
-  return text
-    .split("")
-    .map((char) => underlineUnicodeMap[char] || char + "\u0332")
-    .join("");
-}
-
-// Helper function to replace selected text with strikethrough Unicode
-function replaceWithStrikeTextUnicode(text) {
-  return text
-    .split("")
-    .map((char) => strikeThroughMap[char] || char + "\u0335")
-    .join("");
-}
-
-// Helper function to replace selected text with ordered list Unicode
-function replaceWithOrderedListUnicode(text) {
-  return text
-    .split("")
-    .map((char) => orderedListUnicodeMap[char] || char)
-    .join("");
-}
-
-// Helper function to replace selected text with bullet list Unicode
-function replaceWithBulletListUnicode(text) {
-  const bulletUnicode = "•";
-  return bulletUnicode + " " + text;
-}
-
-// Override the bold button behavior
+// Set up toolbar handlers
 const toolbar = quill.getModule("toolbar");
-toolbar.addHandler("bold", function () {
-  const selection = quill.getSelection();
-  if (selection) {
-    const selectedText = quill.getText(selection.index, selection.length);
-    const boldText = replaceWithBoldUnicode(selectedText);
-    quill.deleteText(selection.index, selection.length);
-    quill.insertText(selection.index, boldText, "bold");
-  }
+Object.entries(toolbarHandlers).forEach(([format, handler]) => {
+  toolbar.addHandler(format, handler);
 });
 
-// Override the italic button behavior
-toolbar.addHandler("italic", function () {
-  const selection = quill.getSelection();
-  if (selection) {
-    const selectedText = quill.getText(selection.index, selection.length);
-    const italicText = replaceWithItalicUnicode(selectedText);
-    quill.deleteText(selection.index, selection.length);
-    quill.insertText(selection.index, italicText, "italic");
-  }
-});
-
-// Override the underline button behavior
-toolbar.addHandler("underline", function () {
-  const selection = quill.getSelection();
-  if (selection) {
-    const selectedText = quill.getText(selection.index, selection.length);
-    const underlineText = replaceWithUnderlineUnicode(selectedText);
-    quill.deleteText(selection.index, selection.length);
-    quill.insertText(selection.index, underlineText, "underline");
-  }
-});
-
-// Override the strikethrough button behavior
-toolbar.addHandler("strike", function () {
-  const selection = quill.getSelection();
-  if (selection) {
-    const selectedText = quill.getText(selection.index, selection.length);
-    const strikeText = replaceWithStrikeTextUnicode(selectedText);
-    quill.deleteText(selection.index, selection.length);
-    quill.insertText(selection.index, strikeText, "strike");
-  }
-});
-
-// Override the ordered list button behavior
-toolbar.addHandler("list", function (value) {
-  if (value === "ordered") {
-    const selection = quill.getSelection();
-    if (selection) {
-      const selectedText = quill.getText(selection.index, selection.length);
-      const lines = selectedText.split("\n");
-      const orderedListText = lines
-        .map((line, index) =>
-          replaceWithOrderedListUnicode(`${index + 1}. ${line}`),
-        )
-        .join("\n");
-      quill.deleteText(selection.index, selection.length);
-      quill.insertText(selection.index, orderedListText);
-    }
-  } else if (value === "bullet") {
-    const selection = quill.getSelection();
-    if (selection) {
-      const selectedText = quill.getText(selection.index, selection.length);
-      const lines = selectedText.split("\n");
-      const bulletListText = lines
-        .map((line) => replaceWithBulletListUnicode(line))
-        .join("\n");
-      quill.deleteText(selection.index, selection.length);
-      quill.insertText(selection.index, bulletListText);
-    }
-  }
-});
-
-// Add text counter
+// Text counter
 const textCounter = document.getElementById("text-counter");
-
 quill.on("text-change", (delta, oldDelta, source) => {
   const text = quill.getText();
   const length = text.length;
 
-  if (length > 3000 && source === "user") {
-    // Check if the change is an insertion
+  if (length > MAX_TEXT_LENGTH && source === "user") {
     if (delta.ops[0].insert) {
-      // Prevent the insertion
       quill.history.undo();
     }
   }
 
-  // Update the text counter
-  if (length > 3000) {
-    textCounter.style.color = "red";
-    textCounter.textContent = `${length} / 3000 (Maximum reached)`;
-  } else {
-    textCounter.style.color = "#666";
-    textCounter.textContent = `${length} / 3000`;
+  textCounter.textContent = `${length} / ${MAX_TEXT_LENGTH}`;
+  textCounter.style.color = length > MAX_TEXT_LENGTH ? "red" : "#666";
+  if (length > MAX_TEXT_LENGTH) {
+    textCounter.textContent += " (Maximum reached)";
   }
 });
 
-// Function to copy formatted text with line breaks from Quill editor to clipboard
+// Copy to clipboard function
 async function copyToClipboard() {
   try {
     const plainText = quill.getText();
