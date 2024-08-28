@@ -40,36 +40,7 @@
       }
     }
   </script>
-  <style type="text/css">
-    .tooltip-enter {
-      opacity: 0;
-      transform: scale(0.9);
-    }
-    .tooltip-enter-active {
-      opacity: 1;
-      transform: scale(1);
-      transition: opacity 300ms, transform 300ms;
-    }
-    .tooltip-exit {
-      opacity: 1;
-    }
-    .tooltip-exit-active {
-      opacity: 0;
-      transform: scale(0.9);
-      transition: opacity 300ms, transform 300ms;
-    }
-  
-    #info-tooltip::after {
-      content: '';
-      position: absolute;
-      bottom: -10px;
-      right: 10px;
-      border-width: 10px 10px 0;
-      border-style: solid;
-      border-color: white transparent transparent transparent;
-      filter: drop-shadow(0 2px 1px rgba(0,0,0,0.1));
-    }
-  </style>
+  <link rel="stylesheet" href="/styles.css">
 </head>
 <body class="bg-green-100 flex flex-col min-h-screen">
   <div class="container mx-auto px-4 py-8 flex-grow flex flex-col justify-center max-w-2xl">
