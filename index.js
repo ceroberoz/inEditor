@@ -1,9 +1,10 @@
 import { config } from "dotenv";
 import express from "express";
-import { dirname, join, fileURLToPath } from "path";
+import { dirname, join } from "path";
 import OpenAI from "openai";
 import { getLlama3CompletionStream } from './aiService.js';
 import { fileURLToPath } from "url";
+import path from 'path';
 
 config();
 
