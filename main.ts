@@ -39,15 +39,20 @@ router.get("/", async (ctx) => {
   ctx.response.type = "text/html";
 });
 
+// Test POST endpoint
+router.post("/test-post", async (ctx) => {
+  console.log("Received POST request to /test-post");
+  console.log("Headers:", ctx.request.headers);
+  const body = await ctx.request.body().value;
+  console.log("Body:", body);
+  ctx.response.body = { message: "Test POST request received" };
+});
+
 // AI Assist endpoint
 router.post("/ai-assist", async (ctx) => {
+  console.log("Received POST request to /ai-assist");
+  console.log("Headers:", ctx.request.headers);
   try {
-    if (ctx.request.headers.get("content-type") !== "application/json") {
-      ctx.response.status = 415;
-      ctx.response.body = { error: 'Unsupported Media Type' };
-      return;
-    }
-
     const body = await ctx.request.body().value;
     console.log("Received body:", body);
     const { prompt } = body;
@@ -58,21 +63,8 @@ router.post("/ai-assist", async (ctx) => {
       return;
     }
 
-    ctx.response.type = "text/event-stream";
-    const target = ctx.response.body = new TransformStream();
-    const writer = target.writable.getWriter();
-
-    try {
-      for await (const chunk of getLlama3CompletionStream(prompt)) {
-        await writer.write(`data: ${JSON.stringify({ chunk })}\n\n`);
-      }
-      await writer.write(`data: ${JSON.stringify({ done: true })}\n\n`);
-    } catch (error) {
-      console.error('Error calling Llama3 service:', error);
-      await writer.write(`data: ${JSON.stringify({ error: 'Failed to get AI assistance' })}\n\n`);
-    } finally {
-      await writer.close();
-    }
+    // For debugging, just echo back the prompt
+    ctx.response.body = { message: "Received prompt", prompt };
   } catch (error) {
     console.error('Error in /ai-assist endpoint:', error);
     ctx.response.status = 500;
