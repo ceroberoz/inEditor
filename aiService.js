@@ -5,10 +5,10 @@ config();
 
 const openai = new OpenAI({
   baseURL: "https://openrouter.ai/api/v1",
-  apiKey: Deno.env.get("OPENROUTER_API_KEY"),
+  apiKey: process.env.OPENROUTER_API_KEY,
   defaultHeaders: {
-    "HTTP-Referer": Deno.env.get("YOUR_SITE_URL"),
-    "X-Title": Deno.env.get("YOUR_SITE_NAME"),
+    // "HTTP-Referer": Deno.env.get("YOUR_SITE_URL"),
+    // "X-Title": Deno.env.get("YOUR_SITE_NAME"),
   }
 });
 

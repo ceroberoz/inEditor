@@ -1,16 +1,17 @@
 import { config } from "dotenv";
 import express from "express";
-import { dirname, fromFileUrl, join } from "path";
+import { dirname, join, fileURLToPath } from "path";
 import OpenAI from "openai";
 import { getLlama3CompletionStream } from './aiService.js';
+import { fileURLToPath } from "url";
 
 config();
 
-console.log("OPENROUTER_API_KEY:", Deno.env.get("OPENROUTER_API_KEY") ? "Set" : "Not set");
-console.log("YOUR_SITE_URL:", Deno.env.get("YOUR_SITE_URL"));
-console.log("YOUR_SITE_NAME:", Deno.env.get("YOUR_SITE_NAME"));
+console.log("OPENROUTER_API_KEY:", process.env.OPENROUTER_API_KEY ? "Set" : "Not set");
+console.log("YOUR_SITE_URL:", process.env.YOUR_SITE_URL);
+console.log("YOUR_SITE_NAME:", process.env.YOUR_SITE_NAME);
 
-const __filename = fromFileUrl(import.meta.url);
+const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
@@ -18,10 +19,10 @@ const app = express();
 // OpenRouter configuration
 const openai = new OpenAI({
   baseURL: "https://openrouter.ai/api/v1",
-  apiKey: Deno.env.get("OPENROUTER_API_KEY"),
+  apiKey: process.env.OPENROUTER_API_KEY,
   defaultHeaders: {
-    "HTTP-Referer": Deno.env.get("YOUR_SITE_URL"),
-    "X-Title": Deno.env.get("YOUR_SITE_NAME"),
+    "HTTP-Referer": process.env.YOUR_SITE_URL,
+    "X-Title": process.env.YOUR_SITE_NAME,
   }
 });
 
