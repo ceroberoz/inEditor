@@ -1,14 +1,13 @@
-import dotenv from 'npm:dotenv';
-import express from 'npm:express';
-import path from 'npm:path';
-import { fileURLToPath } from 'npm:url';
-import OpenAI from "npm:openai";
+import { config } from "dotenv";
+import express from "express";
+import { dirname, fromFileUrl, join } from "path";
+import OpenAI from "openai";
 import { getLlama3CompletionStream } from './aiService.js';
 
-dotenv.config();
+config();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __filename = fromFileUrl(import.meta.url);
+const __dirname = dirname(__filename);
 
 const app = express();
 
