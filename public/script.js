@@ -161,10 +161,16 @@ document.addEventListener('click', (event) => {
 
 // AI Assist functionality
 async function getAIAssistance() {
+  const aiAssistButton = document.getElementById('ai-assist-button');
   const currentText = quill.getText();
   const prompt = "Improve the following LinkedIn post:\n\n" + currentText;
 
   try {
+    // Change cursor to loading state
+    document.body.style.cursor = 'wait';
+    aiAssistButton.disabled = true;
+    aiAssistButton.classList.add('opacity-50');
+
     const response = await fetch('/ai-assist', {
       method: 'POST',
       headers: {
@@ -177,17 +183,41 @@ async function getAIAssistance() {
       throw new Error('AI assistance request failed');
     }
 
-    const data = await response.json();
-    const improvedText = data.result;
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let improvedText = '';
 
-    // Replace the current text with the AI-improved version
-    quill.setText(improvedText);
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      
+      const chunk = decoder.decode(value);
+      const lines = chunk.split('\n\n');
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const data = JSON.parse(line.slice(6));
+          if (data.chunk) {
+            improvedText += data.chunk;
+            quill.setText(improvedText);
+          } else if (data.done) {
+            break;
+          } else if (data.error) {
+            throw new Error(data.error);
+          }
+        }
+      }
+    }
 
     // Show a success message
     alert('Your post has been improved by AI!');
   } catch (error) {
     console.error('Error getting AI assistance:', error);
     alert('Failed to get AI assistance. Please try again.');
+  } finally {
+    // Reset cursor and button state
+    document.body.style.cursor = 'default';
+    aiAssistButton.disabled = false;
+    aiAssistButton.classList.remove('opacity-50');
   }
 }
 

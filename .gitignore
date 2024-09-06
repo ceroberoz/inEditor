@@ -169,3 +169,6 @@ junit.xml
 # Jupyter files
 .ipynb_checkpoints/
 Untitled*.ipynb
+
+# Cursor AI
+yuki.cursorrules

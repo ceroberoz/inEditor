@@ -3,7 +3,7 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import OpenAI from "openai";
-import axios from 'axios';
+import { getLlama3CompletionStream } from './aiService.js';
 
 dotenv.config();
 
@@ -12,21 +12,15 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// OpenAI configuration
+// OpenRouter configuration
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY, // Make sure this is in your .env file
-  // organization: "org-NCbXbk3Z0zVLiKb3UZFSbncu",
-});
-
-async function getOllamaCompletion(prompt) {
-  try {
-    const response = await axios.post('http://localhost:11434/api/generate', { model: "llama3", prompt: prompt, stream: false });
-    return response.data.response;
-  } catch (error) {
-    console.error('Error calling Ollama:', error);
-    throw new Error('Failed to get Ollama completion');
+  baseURL: "https://openrouter.ai/api/v1",
+  apiKey: process.env.OPENROUTER_API_KEY,
+  defaultHeaders: {
+    "HTTP-Referer": process.env.YOUR_SITE_URL, // Make sure to set this in your .env file
+    "X-Title": process.env.YOUR_SITE_NAME, // Make sure to set this in your .env file
   }
-}
+});
 
 // Set up EJS as the templating engine
 app.set('view engine', 'ejs');
@@ -50,13 +44,25 @@ app.use(express.json());
 app.post('/ai-assist', async (req, res) => {
   const { prompt } = req.body;
 
-  try {
-    const completion = await getOllamaCompletion(prompt);
-    console.log('Ollama service response:', completion);
+  if (!prompt || typeof prompt !== 'string' || prompt.length > 1000) {
+    return res.status(400).json({ error: 'Invalid prompt' });
+  }
 
-    res.json({ result: completion.trim() });
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive'
+  });
+
+  try {
+    for await (const chunk of getLlama3CompletionStream(prompt)) {
+      res.write(`data: ${JSON.stringify({ chunk })}\n\n`);
+    }
+    res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
   } catch (error) {
-    console.error('Error calling Ollama service:', error);
-    res.status(500).json({ error: 'Failed to get AI assistance', details: error.message });
+    console.error('Error calling Llama3 service:', error);
+    res.write(`data: ${JSON.stringify({ error: 'Failed to get AI assistance' })}\n\n`);
+  } finally {
+    res.end();
   }
 });
