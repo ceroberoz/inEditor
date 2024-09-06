@@ -6,6 +6,10 @@ import { getLlama3CompletionStream } from './aiService.js';
 
 config();
 
+console.log("OPENROUTER_API_KEY:", Deno.env.get("OPENROUTER_API_KEY") ? "Set" : "Not set");
+console.log("YOUR_SITE_URL:", Deno.env.get("YOUR_SITE_URL"));
+console.log("YOUR_SITE_NAME:", Deno.env.get("YOUR_SITE_NAME"));
+
 const __filename = fromFileUrl(import.meta.url);
 const __dirname = dirname(__filename);
 
