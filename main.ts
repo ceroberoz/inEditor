@@ -50,6 +50,7 @@ router.post("/test-post", async (ctx) => {
 
 // AI Assist endpoint
 router.post("/ai-assist", async (ctx) => {
+  console.log("Received request to /ai-assist");
   try {
     const body = await ctx.request.body().value;
     const { prompt } = body;
