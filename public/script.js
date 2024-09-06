@@ -158,3 +158,38 @@ document.addEventListener('click', (event) => {
     infoTooltip.classList.add('hidden');
   }
 });
+
+// AI Assist functionality
+async function getAIAssistance() {
+  const currentText = quill.getText();
+  const prompt = "Improve the following LinkedIn post:\n\n" + currentText;
+
+  try {
+    const response = await fetch('/ai-assist', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ prompt }),
+    });
+
+    if (!response.ok) {
+      throw new Error('AI assistance request failed');
+    }
+
+    const data = await response.json();
+    const improvedText = data.result;
+
+    // Replace the current text with the AI-improved version
+    quill.setText(improvedText);
+
+    // Show a success message
+    alert('Your post has been improved by AI!');
+  } catch (error) {
+    console.error('Error getting AI assistance:', error);
+    alert('Failed to get AI assistance. Please try again.');
+  }
+}
+
+// Add event listener to the AI Assist button
+document.getElementById('ai-assist-button').addEventListener('click', getAIAssistance);
