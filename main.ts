@@ -4,6 +4,7 @@ import { renderFileToString } from "https://deno.land/x/dejs@0.10.3/mod.ts";
 import { getLlama3CompletionStream } from './aiService.ts';
 import { join, dirname, fromFileUrl } from "https://deno.land/std@0.204.0/path/mod.ts";
 import { oakCors } from "https://deno.land/x/cors@v1.2.2/mod.ts";
+import { timeout } from "https://deno.land/std@0.204.0/async/mod.ts";
 
 // Load environment variables
 await config({ export: true });
@@ -68,16 +69,33 @@ router.post("/ai-assist", async (ctx) => {
     const target = ctx.response.body = new TransformStream();
     const writer = target.writable.getWriter();
 
+    const streamTimeout = 30000; // 30 seconds
     try {
-      for await (const chunk of getLlama3CompletionStream(prompt)) {
-        await writer.write(`data: ${JSON.stringify({ chunk })}\n\n`);
-      }
-      await writer.write(`data: ${JSON.stringify({ done: true })}\n\n`);
+      await timeout(async () => {
+        for await (const chunk of getLlama3CompletionStream(prompt)) {
+          try {
+            await writer.write(`data: ${JSON.stringify({ chunk })}\n\n`);
+          } catch (writeError) {
+            console.error('Error writing to stream:', writeError);
+            break;
+          }
+        }
+        await writer.write(`data: ${JSON.stringify({ done: true })}\n\n`);
+      }, streamTimeout);
     } catch (error) {
-      console.error('Error calling Llama3 service:', error);
-      await writer.write(`data: ${JSON.stringify({ error: 'Failed to get AI assistance' })}\n\n`);
+      if (error instanceof TimeoutError) {
+        console.error('Stream timed out');
+        await writer.write(`data: ${JSON.stringify({ error: 'Stream timed out' })}\n\n`);
+      } else {
+        console.error('Error calling Llama3 service:', error);
+        await writer.write(`data: ${JSON.stringify({ error: 'Failed to get AI assistance' })}\n\n`);
+      }
     } finally {
-      await writer.close();
+      try {
+        await writer.close();
+      } catch (closeError) {
+        console.error('Error closing writer:', closeError);
+      }
     }
   } catch (error) {
     console.error('Error in /ai-assist endpoint:', error);
