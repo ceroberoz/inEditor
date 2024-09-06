@@ -192,16 +192,21 @@ async function getAIAssistance() {
       if (done) break;
       
       const chunk = decoder.decode(value);
+      console.log("Received chunk:", chunk);
       const lines = chunk.split('\n\n');
       for (const line of lines) {
         if (line.startsWith('data: ')) {
           const data = JSON.parse(line.slice(6));
+          console.log("Parsed data:", data);
           if (data.chunk) {
             improvedText += data.chunk;
+            console.log("Updated text:", improvedText);
             quill.setText(improvedText);
           } else if (data.done) {
+            console.log("AI assistance completed");
             break;
           } else if (data.error) {
+            console.error("AI assistance error:", data.error);
             throw new Error(data.error);
           }
         }

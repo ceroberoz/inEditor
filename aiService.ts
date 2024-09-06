@@ -25,8 +25,9 @@ export async function* getLlama3CompletionStream(prompt: string) {
     });
 
     for await (const chunk of stream) {
-      console.log("Received AI chunk:", chunk.choices[0]?.delta?.content);
-      yield chunk.choices[0]?.delta?.content || "";
+      const content = chunk.choices[0]?.delta?.content || "";
+      console.log("Yielding chunk:", content);
+      yield content;
     }
   } catch (error) {
     console.error('Error calling OpenRouter:', error);

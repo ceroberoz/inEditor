@@ -80,7 +80,7 @@ async function handleRequest(req: Request): Promise<Response> {
           try {
             console.log("Starting AI stream");
             for await (const chunk of getLlama3CompletionStream(prompt)) {
-              console.log("Received chunk:", chunk);
+              console.log("Sending chunk to client:", chunk);
               controller.enqueue(`data: ${JSON.stringify({ chunk })}\n\n`);
             }
             controller.enqueue(`data: ${JSON.stringify({ done: true })}\n\n`);
