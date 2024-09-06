@@ -50,25 +50,32 @@ router.post("/test-post", async (ctx) => {
 
 // AI Assist endpoint
 router.post("/ai-assist", async (ctx) => {
-  console.log("Received POST request to /ai-assist");
-  console.log("Headers:", ctx.request.headers);
+  const body = await ctx.request.body().value;
+  const { prompt } = body;
+
+  if (!prompt || typeof prompt !== 'string' || prompt.length > 1000) {
+    ctx.response.status = 400;
+    ctx.response.body = { error: 'Invalid prompt' };
+    return;
+  }
+
+  ctx.response.type = "text/event-stream";
+  ctx.response.headers.set("Cache-Control", "no-cache");
+  ctx.response.headers.set("Connection", "keep-alive");
+
+  const target = ctx.response.body = new TransformStream();
+  const writer = target.writable.getWriter();
+
   try {
-    const body = await ctx.request.body().value;
-    console.log("Received body:", body);
-    const { prompt } = body;
-
-    if (!prompt || typeof prompt !== 'string' || prompt.length > 1000) {
-      ctx.response.status = 400;
-      ctx.response.body = { error: 'Invalid prompt' };
-      return;
+    for await (const chunk of getLlama3CompletionStream(prompt)) {
+      await writer.write(`data: ${JSON.stringify({ chunk })}\n\n`);
     }
-
-    // For debugging, just echo back the prompt
-    ctx.response.body = { message: "Received prompt", prompt };
+    await writer.write(`data: ${JSON.stringify({ done: true })}\n\n`);
   } catch (error) {
-    console.error('Error in /ai-assist endpoint:', error);
-    ctx.response.status = 500;
-    ctx.response.body = { error: 'Internal server error' };
+    console.error('Error calling Llama3 service:', error);
+    await writer.write(`data: ${JSON.stringify({ error: 'Failed to get AI assistance' })}\n\n`);
+  } finally {
+    await writer.close();
   }
 });
 
