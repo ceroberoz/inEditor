@@ -50,32 +50,38 @@ router.post("/test-post", async (ctx) => {
 
 // AI Assist endpoint
 router.post("/ai-assist", async (ctx) => {
-  const body = await ctx.request.body().value;
-  const { prompt } = body;
-
-  if (!prompt || typeof prompt !== 'string' || prompt.length > 1000) {
-    ctx.response.status = 400;
-    ctx.response.body = { error: 'Invalid prompt' };
-    return;
-  }
-
-  ctx.response.type = "text/event-stream";
-  ctx.response.headers.set("Cache-Control", "no-cache");
-  ctx.response.headers.set("Connection", "keep-alive");
-
-  const target = ctx.response.body = new TransformStream();
-  const writer = target.writable.getWriter();
-
   try {
-    for await (const chunk of getLlama3CompletionStream(prompt)) {
-      await writer.write(`data: ${JSON.stringify({ chunk })}\n\n`);
+    const body = await ctx.request.body().value;
+    const { prompt } = body;
+
+    if (!prompt || typeof prompt !== 'string' || prompt.length > 1000) {
+      ctx.response.status = 400;
+      ctx.response.body = { error: 'Invalid prompt' };
+      return;
     }
-    await writer.write(`data: ${JSON.stringify({ done: true })}\n\n`);
+
+    ctx.response.type = "text/event-stream";
+    ctx.response.headers.set("Cache-Control", "no-cache");
+    ctx.response.headers.set("Connection", "keep-alive");
+
+    const target = ctx.response.body = new TransformStream();
+    const writer = target.writable.getWriter();
+
+    try {
+      for await (const chunk of getLlama3CompletionStream(prompt)) {
+        await writer.write(`data: ${JSON.stringify({ chunk })}\n\n`);
+      }
+      await writer.write(`data: ${JSON.stringify({ done: true })}\n\n`);
+    } catch (error) {
+      console.error('Error calling Llama3 service:', error);
+      await writer.write(`data: ${JSON.stringify({ error: 'Failed to get AI assistance' })}\n\n`);
+    } finally {
+      await writer.close();
+    }
   } catch (error) {
-    console.error('Error calling Llama3 service:', error);
-    await writer.write(`data: ${JSON.stringify({ error: 'Failed to get AI assistance' })}\n\n`);
-  } finally {
-    await writer.close();
+    console.error('Error in /ai-assist endpoint:', error);
+    ctx.response.status = 500;
+    ctx.response.body = { error: 'Internal server error' };
   }
 });
 
@@ -89,4 +95,12 @@ app.use(router.allowedMethods());
 
 const port = 3000;
 console.log(`Server running on http://localhost:${port}`);
-await app.listen({ port });
+try {
+  await app.listen({ port });
+} catch (error) {
+  if (error instanceof Deno.errors.BadResource) {
+    console.error("Connection error:", error.message);
+  } else {
+    console.error("Unexpected error:", error);
+  }
+}
