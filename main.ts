@@ -3,6 +3,7 @@ import { config } from "https://deno.land/x/dotenv@v3.2.2/mod.ts";
 import { renderFileToString } from "https://deno.land/x/dejs@0.10.3/mod.ts";
 import { getLlama3CompletionStream } from './aiService.ts';
 import { join, dirname, fromFileUrl } from "https://deno.land/std@0.204.0/path/mod.ts";
+import { oakCors } from "https://deno.land/x/cors@v1.2.2/mod.ts";
 
 // Load environment variables
 await config({ export: true });
@@ -15,6 +16,9 @@ const __dirname = dirname(fromFileUrl(import.meta.url));
 
 const app = new Application();
 const router = new Router();
+
+// Add CORS middleware
+app.use(oakCors());
 
 // Serve static files
 app.use(async (ctx, next) => {
@@ -37,30 +41,42 @@ router.get("/", async (ctx) => {
 
 // AI Assist endpoint
 router.post("/ai-assist", async (ctx) => {
-  const body = await ctx.request.body().value;
-  const { prompt } = body;
-
-  if (!prompt || typeof prompt !== 'string' || prompt.length > 1000) {
-    ctx.response.status = 400;
-    ctx.response.body = { error: 'Invalid prompt' };
-    return;
-  }
-
-  ctx.response.type = "text/event-stream";
-  const target = ctx.response.body = new TransformStream();
-  const writer = target.writable.getWriter();
-
   try {
-    for await (const chunk of getLlama3CompletionStream(prompt)) {
-      await writer.write(`data: ${JSON.stringify({ chunk })}\n\n`);
+    const body = await ctx.request.body().value;
+    console.log("Received body:", body);  // Add this line
+    const { prompt } = body;
+
+    if (!prompt || typeof prompt !== 'string' || prompt.length > 1000) {
+      ctx.response.status = 400;
+      ctx.response.body = { error: 'Invalid prompt' };
+      return;
     }
-    await writer.write(`data: ${JSON.stringify({ done: true })}\n\n`);
+
+    ctx.response.type = "text/event-stream";
+    const target = ctx.response.body = new TransformStream();
+    const writer = target.writable.getWriter();
+
+    try {
+      for await (const chunk of getLlama3CompletionStream(prompt)) {
+        await writer.write(`data: ${JSON.stringify({ chunk })}\n\n`);
+      }
+      await writer.write(`data: ${JSON.stringify({ done: true })}\n\n`);
+    } catch (error) {
+      console.error('Error calling Llama3 service:', error);
+      await writer.write(`data: ${JSON.stringify({ error: 'Failed to get AI assistance' })}\n\n`);
+    } finally {
+      await writer.close();
+    }
   } catch (error) {
-    console.error('Error calling Llama3 service:', error);
-    await writer.write(`data: ${JSON.stringify({ error: 'Failed to get AI assistance' })}\n\n`);
-  } finally {
-    await writer.close();
+    console.error('Error in /ai-assist endpoint:', error);
+    ctx.response.status = 500;
+    ctx.response.body = { error: 'Internal server error' };
   }
+});
+
+// Test endpoint
+router.get("/test", (ctx) => {
+  ctx.response.body = "Server is running!";
 });
 
 app.use(router.routes());

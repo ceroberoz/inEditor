@@ -166,11 +166,6 @@ async function getAIAssistance() {
   const prompt = "Improve the following LinkedIn post:\n\n" + currentText;
 
   try {
-    // Change cursor to loading state
-    document.body.style.cursor = 'wait';
-    aiAssistButton.disabled = true;
-    aiAssistButton.classList.add('opacity-50');
-
     const response = await fetch('/ai-assist', {
       method: 'POST',
       headers: {
@@ -180,7 +175,7 @@ async function getAIAssistance() {
     });
 
     if (!response.ok) {
-      throw new Error('AI assistance request failed');
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     const reader = response.body.getReader();
