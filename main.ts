@@ -42,8 +42,14 @@ router.get("/", async (ctx) => {
 // AI Assist endpoint
 router.post("/ai-assist", async (ctx) => {
   try {
+    if (ctx.request.headers.get("content-type") !== "application/json") {
+      ctx.response.status = 415;
+      ctx.response.body = { error: 'Unsupported Media Type' };
+      return;
+    }
+
     const body = await ctx.request.body().value;
-    console.log("Received body:", body);  // Add this line
+    console.log("Received body:", body);
     const { prompt } = body;
 
     if (!prompt || typeof prompt !== 'string' || prompt.length > 1000) {
