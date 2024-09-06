@@ -1,5 +1,5 @@
-import OpenAI from "openai";
-import dotenv from 'dotenv';
+import OpenAI from "npm:openai";
+import dotenv from 'npm:dotenv';
 
 dotenv.config();
 

@@ -1,8 +1,8 @@
-import dotenv from 'dotenv';
-import express from 'express';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import OpenAI from "openai";
+import dotenv from 'npm:dotenv';
+import express from 'npm:express';
+import path from 'npm:path';
+import { fileURLToPath } from 'npm:url';
+import OpenAI from "npm:openai";
 import { getLlama3CompletionStream } from './aiService.js';
 
 dotenv.config();
