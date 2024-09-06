@@ -1,7 +1,4 @@
-import OpenAI from "openai";
-import { config } from "dotenv";
-
-config();
+import OpenAI from "https://deno.land/x/openai@v4.20.1/mod.ts";
 
 const openai = new OpenAI({
   baseURL: "https://openrouter.ai/api/v1",
@@ -18,8 +15,9 @@ const openai = new OpenAI({
  * @returns {AsyncGenerator<string>} A generator that yields chunks of the model's response.
  * @throws {Error} If the API call fails.
  */
-export async function* getLlama3CompletionStream(prompt) {
+export async function* getLlama3CompletionStream(prompt: string) {
   try {
+    console.log("Creating AI completion stream");
     const stream = await openai.chat.completions.create({
       model: "meta-llama/llama-3-8b-instruct:free",
       messages: [{ role: "user", content: prompt }],
@@ -27,6 +25,7 @@ export async function* getLlama3CompletionStream(prompt) {
     });
 
     for await (const chunk of stream) {
+      console.log("Received AI chunk:", chunk.choices[0]?.delta?.content);
       yield chunk.choices[0]?.delta?.content || "";
     }
   } catch (error) {
