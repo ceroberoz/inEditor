@@ -1,44 +1,49 @@
-# inEditor: Your LinkedIn Post Helper 📝✨
+# inEditor: LinkedIn Post Enhancer 📝✨
 
-![inEditor in action](https://github.com/ceroberoz/inEditor/blob/meong/capture.png "inEditor - Alpha Release")
+![inEditor in action](https://github.com/ceroberoz/inEditor/blob/meong/capture.png "inEditor - Beta2 Release")
 
-Hello LinkedIn users! 👋 Want to make your posts look better? inEditor can help!
+inEditor is a powerful tool that helps you create better-looking LinkedIn posts by adding text styling options and AI-powered suggestions.
 
-**Try it here**: https://ineditor.deno.dev/
+**Try it now**: https://ineditor.deno.dev/
 
-## What's inEditor?
-LinkedIn doesn't let you style your posts. inEditor fixes that! You can now add **bold**, *italic*, underlined, and ~~strikethrough~~ text to your posts.
+## Features
+- Text styling: **Bold**, *Italic*, Underline, ~~Strikethrough~~
+- One-click copy button
+- Numbered and bullet point lists
+- AI-powered post improvement suggestions 🤖
+- Character count with limit warnings
+- Responsive design
 
-## How to Use
-1. Copy this project to your computer
-2. Go to the project folder
-3. Run `npm install` to get everything ready
-4. Start it with `node index.js`
-5. Open `http://localhost:3000` in your browser and start writing!
+## Tech Stack
+- Deno
+- Oak (web framework for Deno)
+- OpenAI API (via OpenRouter)
+- Quill.js (rich text editor)
+- Tailwind CSS
 
-## What Can It Do?
-- **Bold**: Make words stand out 💪
-- *Italic*: Add some style
-- Underline: Draw attention to words
-- ~~Strikethrough~~: Cross out text
-- Copy button: Easily copy your post
-- Numbered lists: Make ordered lists
-- Bullet points: Make quick lists
-- AI Assist: Get help improving your post 🤖
+## Quick Start for Development
+1. Clone this repo
+2. Navigate to the project directory
+3. Copy `.env.example` to `.env` and add your API keys
+4. Run `deno task start` to start the development server
+5. Open `http://localhost:8000` in your browser
 
-## Setting Up
-1. Copy `.env.example` to `.env`
-2. Fill in your API keys and settings in `.env`
+## Environment Variables
+- `OPENROUTER_API_KEY`: Your OpenRouter API key
+- `YOUR_SITE_URL`: Your site's URL (for OpenRouter rankings)
+- `YOUR_SITE_NAME`: Your site's name (for OpenRouter rankings)
 
-## What's Next?
-We're always working to make inEditor better. Stay tuned for updates!
+## Project Structure
+- `main.ts`: Main application file & AI service for post improvements
+- `public/`: Static files (CSS, JavaScript, images)
+- `views/`: EJS templates
 
-## Known Issues
-Some features might not work perfectly yet. We're fixing them!
+## Contributing
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-## Help Us Improve!
-Like inEditor? Have ideas? Let us know! Feel free to contribute or suggest new features.
+## License
+This project is open source and available under the [MIT License](LICENSE).
 
 ---
 
-Made with ❤️ using Node, Quill, and some AI magic!
+Built with ❤️ by [Perdana Hadi](https://github.com/ceroberoz)
