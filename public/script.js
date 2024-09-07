@@ -162,10 +162,20 @@ document.addEventListener('click', (event) => {
 // AI Assist functionality
 async function getAIAssistance() {
   const aiAssistButton = document.getElementById('ai-assist-button');
+  const aiAssistText = document.getElementById('ai-assist-text');
+  const aiLoading = document.getElementById('ai-loading');
+  const copyButton = document.getElementById('copy-button');
   const currentText = quill.getText();
   const prompt = "Improve the following LinkedIn post:\n\n" + currentText;
+  let aiAssistSuccessful = false;
 
   try {
+    // Show loading indicator and disable button
+    aiLoading.classList.remove('opacity-0');
+    aiAssistText.classList.add('opacity-0');
+    aiAssistButton.disabled = true;
+    copyButton.style.width = '60%';
+
     const response = await fetch('/ai-assist', {
       method: 'POST',
       headers: {
@@ -190,18 +200,36 @@ async function getAIAssistance() {
     quill.setText('');
     quill.clipboard.dangerouslyPasteHTML(0, improvedText.replace(/\n/g, '<br>'));
 
-    // Show a success message
-    alert('Your post has been improved by AI!');
+    aiAssistSuccessful = true;
   } catch (error) {
     console.error('Error getting AI assistance:', error);
-    alert('Failed to get AI assistance. Please try again.');
   } finally {
-    // Reset cursor and button state
-    document.body.style.cursor = 'default';
+    // Hide loading indicator and re-enable button
+    aiLoading.classList.add('opacity-0');
+    aiAssistText.classList.remove('opacity-0');
     aiAssistButton.disabled = false;
-    aiAssistButton.classList.remove('opacity-50');
+    copyButton.style.width = '70%';
+
+    // Show appropriate notification and update character count
+    if (aiAssistSuccessful) {
+      showNotification('Your post has been improved by AI!', 'success');
+      updateCharacterCount();
+    } else {
+      showNotification('Failed to get AI assistance. Please try again.', 'error');
+    }
   }
 }
 
 // Add event listener to the AI Assist button
 document.getElementById('ai-assist-button').addEventListener('click', getAIAssistance);
+
+function showNotification(message, type = 'success') {
+  const notification = document.getElementById('notification');
+  notification.textContent = message;
+  notification.classList.remove('bg-green-500', 'bg-red-500');
+  notification.classList.add(type === 'success' ? 'bg-green-500' : 'bg-red-500');
+  notification.classList.remove('translate-y-full');
+  setTimeout(() => {
+    notification.classList.add('translate-y-full');
+  }, 3000);
+}
