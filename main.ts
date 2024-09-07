@@ -76,11 +76,17 @@ async function handleAIAssist(ctx: Context) {
   try {
     const completion = await openai.chat.completions.create({
       model: "mattshumer/reflection-70b:free",
-      messages: [{ role: "user", content: prompt }],
+      messages: [
+        { role: "system", content: "You are a helpful assistant for creating LinkedIn posts. Please use simple English, avoid complex words, and maintain a professional, calm, and friendly tone in your responses." },
+        { role: "user", content: `Please help me improve this LinkedIn post: ${prompt}` }
+      ],
     });
 
+    const improvedPost = completion.choices[0].message.content;
+    const simplifiedResponse = simplifyLanguage(improvedPost);
+
     ctx.response.body = { 
-      message: completion.choices[0].message.content,
+      message: simplifiedResponse,
       usage: completion.usage
     };
   } catch (error) {
@@ -88,6 +94,13 @@ async function handleAIAssist(ctx: Context) {
     ctx.response.status = 500;
     ctx.response.body = { error: 'Error processing AI request' };
   }
+}
+
+function simplifyLanguage(text: string): string {
+  return text
+    .replace(/\b(utilize|implement|leverage)\b/g, 'use')
+    .replace(/\b(commence|initiate)\b/g, 'start')
+    .replace(/\b(terminate|conclude)\b/g, 'end');
 }
 
 function handleTest(ctx: Context) {
