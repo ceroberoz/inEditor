@@ -178,35 +178,17 @@ async function getAIAssistance() {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let improvedText = '';
+    const data = await response.json();
+    const fullMessage = data.message;
 
-    while (true) {
-      const { value, done } = await reader.read();
-      if (done) break;
-      
-      const chunk = decoder.decode(value);
-      console.log("Received chunk:", chunk);
-      const lines = chunk.split('\n\n');
-      for (const line of lines) {
-        if (line.startsWith('data: ')) {
-          const data = JSON.parse(line.slice(6));
-          console.log("Parsed data:", data);
-          if (data.chunk) {
-            improvedText += data.chunk;
-            console.log("Updated text:", improvedText);
-            quill.setText(improvedText);
-          } else if (data.done) {
-            console.log("AI assistance completed");
-            break;
-          } else if (data.error) {
-            console.error("AI assistance error:", data.error);
-            throw new Error(data.error);
-          }
-        }
-      }
-    }
+    // Extract content within <output> tags
+    const outputRegex = /<output>([\s\S]*?)<\/output>/;
+    const match = fullMessage.match(outputRegex);
+    const improvedText = match ? match[1].trim() : fullMessage;
+
+    // Replace the editor content with the AI-assisted text
+    quill.setText('');
+    quill.clipboard.dangerouslyPasteHTML(0, improvedText.replace(/\n/g, '<br>'));
 
     // Show a success message
     alert('Your post has been improved by AI!');

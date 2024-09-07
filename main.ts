@@ -1,25 +1,40 @@
-import { Application, Router } from "https://deno.land/x/oak@v12.6.1/mod.ts";
+import { Application, Router, Context } from "https://deno.land/x/oak@v12.6.1/mod.ts";
 import { config } from "https://deno.land/x/dotenv@v3.2.2/mod.ts";
 import { renderFileToString } from "https://deno.land/x/dejs@0.10.3/mod.ts";
-import { getLlama3CompletionStream } from './aiService.ts';
+import OpenAI from "https://deno.land/x/openai@v4.20.1/mod.ts";
 import { join, dirname, fromFileUrl } from "https://deno.land/std@0.204.0/path/mod.ts";
 import { oakCors } from "https://deno.land/x/cors@v1.2.2/mod.ts";
-import { timeout } from "https://deno.land/std@0.204.0/async/mod.ts";
 
 // Load environment variables
 await config({ export: true });
 
-console.log("OPENROUTER_API_KEY:", Deno.env.get("OPENROUTER_API_KEY") ? "Set" : "Not set");
-console.log("YOUR_SITE_URL:", Deno.env.get("YOUR_SITE_URL"));
-console.log("YOUR_SITE_NAME:", Deno.env.get("YOUR_SITE_NAME"));
+// Initialize OpenAI client with OpenRouter configuration
+const openai = new OpenAI({
+  baseURL: "https://openrouter.ai/api/v1",
+  apiKey: Deno.env.get("OPENROUTER_API_KEY"),
+  defaultHeaders: {
+    "HTTP-Referer": Deno.env.get("YOUR_SITE_URL"), // Optional, for including your app on openrouter.ai rankings.
+    "X-Title": Deno.env.get("YOUR_SITE_NAME"), // Optional. Shows in rankings on openrouter.ai.
+  }
+});
 
 const __dirname = dirname(fromFileUrl(import.meta.url));
+
+// Helper function to log environment variables
+function logEnvironmentVariables(...variables: string[]) {
+  variables.forEach(variable => {
+    console.log(`${variable}:`, Deno.env.get(variable) ? "Set" : "Not set");
+  });
+}
+
+logEnvironmentVariables("OPENROUTER_API_KEY", "YOUR_SITE_URL", "YOUR_SITE_NAME");
 
 const app = new Application();
 const router = new Router();
 
-// Add CORS middleware
+// Middleware
 app.use(oakCors());
+app.use(errorHandler);
 
 // Serve static files
 app.use(async (ctx, next) => {
@@ -33,85 +48,73 @@ app.use(async (ctx, next) => {
   }
 });
 
-// Render the index page
-router.get("/", async (ctx) => {
+// Route handlers
+async function handleIndex(ctx: Context) {
   const content = await renderFileToString(join(__dirname, "views", "index.ejs"));
   ctx.response.body = content;
   ctx.response.type = "text/html";
-});
+}
 
-// Test POST endpoint
-router.post("/test-post", async (ctx) => {
+async function handleTestPost(ctx: Context) {
   console.log("Received POST request to /test-post");
   console.log("Headers:", ctx.request.headers);
   const body = await ctx.request.body().value;
   console.log("Body:", body);
   ctx.response.body = { message: "Test POST request received" };
-});
+}
 
-// AI Assist endpoint
-router.post("/ai-assist", async (ctx) => {
-  console.log("Received request to /ai-assist");
-  try {
-    const body = await ctx.request.body().value;
-    const { prompt } = body;
+async function handleAIAssist(ctx: Context) {
+  const body = await ctx.request.body().value;
+  const { prompt } = body;
 
-    if (!prompt || typeof prompt !== 'string' || prompt.length > 1000) {
-      ctx.response.status = 400;
-      ctx.response.body = { error: 'Invalid prompt' };
-      return;
-    }
-
-    ctx.response.type = "text/event-stream";
-    ctx.response.headers.set("Cache-Control", "no-cache");
-    ctx.response.headers.set("Connection", "keep-alive");
-
-    const target = ctx.response.body = new TransformStream();
-    const writer = target.writable.getWriter();
-
-    const streamTimeout = 30000; // 30 seconds
-    try {
-      await timeout(async () => {
-        for await (const chunk of getLlama3CompletionStream(prompt)) {
-          try {
-            await writer.write(`data: ${JSON.stringify({ chunk })}\n\n`);
-          } catch (writeError) {
-            console.error('Error writing to stream:', writeError);
-            break;
-          }
-        }
-        await writer.write(`data: ${JSON.stringify({ done: true })}\n\n`);
-      }, streamTimeout);
-    } catch (error) {
-      if (error instanceof TimeoutError) {
-        console.error('Stream timed out');
-        await writer.write(`data: ${JSON.stringify({ error: 'Stream timed out' })}\n\n`);
-      } else {
-        console.error('Error calling Llama3 service:', error);
-        await writer.write(`data: ${JSON.stringify({ error: 'Failed to get AI assistance' })}\n\n`);
-      }
-    } finally {
-      try {
-        await writer.close();
-      } catch (closeError) {
-        console.error('Error closing writer:', closeError);
-      }
-    }
-  } catch (error) {
-    console.error('Error in /ai-assist endpoint:', error);
-    ctx.response.status = 500;
-    ctx.response.body = { error: 'Internal server error' };
+  if (!prompt || typeof prompt !== 'string' || prompt.length > 1000) {
+    ctx.response.status = 400;
+    ctx.response.body = { error: 'Invalid prompt' };
+    return;
   }
-});
 
-// Test endpoint
-router.get("/test", (ctx) => {
+  try {
+    const completion = await openai.chat.completions.create({
+      model: "mattshumer/reflection-70b:free",
+      messages: [{ role: "user", content: prompt }],
+    });
+
+    ctx.response.body = { 
+      message: completion.choices[0].message.content,
+      usage: completion.usage
+    };
+  } catch (error) {
+    console.error('Error in AI assist:', error);
+    ctx.response.status = 500;
+    ctx.response.body = { error: 'Error processing AI request' };
+  }
+}
+
+function handleTest(ctx: Context) {
   ctx.response.body = "Server is running!";
-});
+}
+
+// Routes
+router.get("/", handleIndex);
+router.post("/test-post", handleTestPost);
+router.post("/ai-assist", handleAIAssist);
+router.get("/test", handleTest);
 
 app.use(router.routes());
 app.use(router.allowedMethods());
 
+// Error handling middleware
+async function errorHandler(ctx: Context, next: () => Promise<unknown>) {
+  try {
+    await next();
+  } catch (err) {
+    console.error('Unhandled error:', err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: 'Internal server error' };
+  }
+}
+
+// Start server
 const port = 3000;
 console.log(`Server running on http://localhost:${port}`);
 try {

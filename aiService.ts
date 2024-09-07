@@ -2,10 +2,10 @@ import OpenAI from "https://deno.land/x/openai@v4.20.1/mod.ts";
 
 const openai = new OpenAI({
   baseURL: "https://openrouter.ai/api/v1",
-  apiKey: Deno.env.get("OPENROUTER_API_KEY"),
+  apiKey: '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',
   defaultHeaders: {
-    "HTTP-Referer": Deno.env.get("YOUR_SITE_URL"),
-    "X-Title": Deno.env.get("YOUR_SITE_NAME"),
+    // "HTTP-Referer": Deno.env.get("YOUR_SITE_URL"),
+    // "X-Title": Deno.env.get("YOUR_SITE_NAME"),
   }
 });
 
