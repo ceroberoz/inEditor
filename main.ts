@@ -13,8 +13,8 @@ const openai = new OpenAI({
   baseURL: "https://openrouter.ai/api/v1",
   apiKey: Deno.env.get("OPENROUTER_API_KEY"),
   defaultHeaders: {
-    "HTTP-Referer": Deno.env.get("YOUR_SITE_URL"), // Optional, for including your app on openrouter.ai rankings.
-    "X-Title": Deno.env.get("YOUR_SITE_NAME"), // Optional. Shows in rankings on openrouter.ai.
+    "HTTP-Referer": Deno.env.get("YOUR_SITE_URL"),
+    "X-Title": Deno.env.get("YOUR_SITE_NAME"),
   }
 });
 
@@ -75,11 +75,45 @@ async function handleAIAssist(ctx: Context) {
 
   try {
     const completion = await openai.chat.completions.create({
-      model: "mattshumer/reflection-70b:free",
+      model: "google/gemini-flash-1.5-exp",
       messages: [
-        { role: "system", content: "You are a helpful assistant for creating LinkedIn posts. Please use simple English, avoid complex words, and maintain a professional, calm, and friendly tone in your responses." },
-        { role: "user", content: `Please help me improve this LinkedIn post: ${prompt}` }
+        { 
+          role: "system", 
+          content: `You are an expert LinkedIn post creator. Your task is to improve or create LinkedIn posts with the following structure:
+
+1. Headline (1 line):
+   - Attention-grabbing and relevant to the content
+   - Use emojis sparingly if appropriate
+
+2. Body (3-5 paragraphs):
+   - Start with a hook or interesting fact
+   - Present the main content or idea clearly
+   - Use short paragraphs for readability
+   - Include relevant personal experiences or insights
+   - Use bullet points or numbered lists for easy scanning
+
+3. Call to Action (1-2 lines):
+   - Encourage engagement (e.g., comments, likes, shares)
+   - Ask a question or prompt discussion
+   - Provide a clear next step for readers
+
+General Guidelines:
+- Use simple, professional English
+- Maintain a friendly and approachable tone
+- Keep the total post under 1,300 characters
+- Use line breaks between sections for clarity
+- Include 2-3 relevant hashtags at the end
+
+Please format the improved post clearly, separating the Headline, Body, and Call to Action sections.`
+        },
+        { 
+          role: "user", 
+          content: `Please help me improve this LinkedIn post: ${prompt}` 
+        }
       ],
+      "top_p": 1,
+      "temperature": 0.5,
+      "repetition_penalty": 1,
     });
 
     const improvedPost = completion.choices[0].message.content;
