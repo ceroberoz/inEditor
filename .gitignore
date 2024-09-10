@@ -171,4 +171,4 @@ junit.xml
 Untitled*.ipynb
 
 # Cursor AI
-yuki.cursorrules
+*.cursorrules

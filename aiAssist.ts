@@ -26,11 +26,16 @@ const openai = new OpenAI({
 
 // Define the models in order of preference
 const models = [
-  "google/gemma-2-9b-it:free",
-  "nousresearch/hermes-3-llama-3.1-405b",
-  "meta-llama/llama-3-8b-instruct:free",
-  "mattshumer/reflection-70b:free"
+  "google/gemini-pro-1.5-exp", // Likely the best overall for quality and contextual understanding, ideal for engaging LinkedIn posts.
+  "meta-llama/llama-3-8b-instruct:free", // Strong instruction-following and balanced performance, good for coherent content.
+  "mistralai/mistral-7b-instruct:free", // Reliable and accessible with good instruction-following capabilities.
+  "mattshumer/reflection-70b:free", // Large model that can generate detailed content but may overcomplicate posts.
+  "google/gemma-2-9b-it:free", // A smaller variant within the Google family, still strong but not as prioritized as the pro version.
+  "microsoft/phi-3-medium-128k-instruct:free", // Good for straightforward and structured posts, solid performance.
+  "openchat/openchat-7b:free", // More general-purpose and smaller, suitable for less demanding content tasks.
+  "nousresearch/hermes-3-llama-3.1-405b" // Potentially powerful but less tailored for LinkedIn content, needs testing.
 ];
+
 
 // System message template for LinkedIn post creation
 const SYSTEM_MESSAGE = `You are an expert LinkedIn post creator. Your task is to improve or create LinkedIn posts with the following structure:
