@@ -188,17 +188,18 @@ async function getAIAssistance() {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const data = await response.json();
-    const fullMessage = data.message;
+    const reader = response.body.getReader();
+    let improvedText = '';
 
-    // Extract content within <output> tags
-    const outputRegex = /<output>([\s\S]*?)<\/output>/;
-    const match = fullMessage.match(outputRegex);
-    const improvedText = match ? match[1].trim() : fullMessage;
-
-    // Replace the editor content with the AI-assisted text
-    quill.setText('');
-    quill.clipboard.dangerouslyPasteHTML(0, improvedText.replace(/\n/g, '<br>'));
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      improvedText += new TextDecoder().decode(value);
+      
+      // Update the editor content in real-time
+      quill.setText('');
+      quill.clipboard.dangerouslyPasteHTML(0, improvedText.replace(/\n/g, '<br>'));
+    }
 
     aiAssistSuccessful = true;
   } catch (error) {
