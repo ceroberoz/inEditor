@@ -5,6 +5,13 @@ import { config } from "https://deno.land/x/dotenv@v3.2.2/mod.ts";
 // Load environment variables
 await config({ export: true });
 
+const REQUIRED_ENV_VARS = ['OPENROUTER_API_KEY', 'YOUR_SITE_URL', 'YOUR_SITE_NAME'];
+for (const envVar of REQUIRED_ENV_VARS) {
+  if (!Deno.env.get(envVar)) {
+    throw new Error(`Missing required environment variable: ${envVar}`);
+  }
+}
+
 // Initialize OpenAI client
 const openai = new OpenAI({
   baseURL: "https://openrouter.ai/api/v1",
@@ -12,7 +19,8 @@ const openai = new OpenAI({
   defaultHeaders: {
     "HTTP-Referer": Deno.env.get("YOUR_SITE_URL"),
     "X-Title": Deno.env.get("YOUR_SITE_NAME"),
-  }
+  },
+  timeout: 30000, // 30 seconds
 });
 
 // Define the models in order of preference
@@ -65,6 +73,12 @@ async function retryWithBackoff<T>(
 }
 
 export async function handleAIAssist(ctx: Context) {
+  if (ctx.request.headers.get("content-type") !== "application/json") {
+    ctx.response.status = 415;
+    ctx.response.body = { error: "Unsupported Media Type" };
+    return;
+  }
+
   const body = await ctx.request.body().value;
   const { prompt } = body;
 
@@ -134,10 +148,18 @@ Please format the improved post clearly, separating the Headline, Body, and Call
           }
         } catch (error) {
           console.error('Error in AI assist:', error);
-          controller.enqueue(new TextEncoder().encode(`Error: ${error.message}`));
+          if (error instanceof OpenAI.APIError) {
+            controller.enqueue(new TextEncoder().encode(`Error: ${error.message}`));
+          } else {
+            controller.enqueue(new TextEncoder().encode('Error: Unexpected error occurred'));
+          }
         } finally {
           controller.close();
         }
+      },
+      cancel() {
+        // Handle client disconnection
+        console.log('Client disconnected');
       }
     });
 

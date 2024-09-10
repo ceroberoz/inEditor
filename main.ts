@@ -23,7 +23,10 @@ const app = new Application();
 const router = new Router();
 
 // Middleware
-app.use(oakCors());
+app.use(oakCors({
+  origin: Deno.env.get("ALLOWED_ORIGINS")?.split(",") || "*",
+  optionsSuccessStatus: 200,
+}));
 app.use(errorHandler);
 
 // Serve static files
@@ -32,6 +35,7 @@ app.use(async (ctx, next) => {
     await ctx.send({
       root: join(__dirname, "public"),
       index: "index.html",
+      maxage: 86400000, // 1 day in milliseconds
     });
   } catch {
     await next();
