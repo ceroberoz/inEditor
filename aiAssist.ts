@@ -62,6 +62,14 @@ General Guidelines:
 
 Please format the improved post clearly, separating the Headline, Body, and Call to Action sections.`;
 
+// Prompt for the user
+const USER_PROMPT = `Please help me improve this LinkedIn post: 
+
+Topic: {prompt}
+
+Can you help me create an engaging post with this concept?
+`;
+
 // Health check function to find an available model
 async function healthCheck(): Promise<string> {
   for (const model of models) {
@@ -136,7 +144,7 @@ export async function handleAIAssist(ctx: Context) {
               },
               { 
                 role: "user", 
-                content: `Please help me improve this LinkedIn post: ${prompt}` 
+                content: USER_PROMPT.replace("{prompt}", prompt)
               }
             ],
             temperature: 0.5,
