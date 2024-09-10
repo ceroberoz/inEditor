@@ -15,6 +15,33 @@ const openai = new OpenAI({
   }
 });
 
+// Define the models in order of preference
+const models = [
+  "google/gemma-2-9b-it:free",
+  "nousresearch/hermes-3-llama-3.1-405b",
+  "meta-llama/llama-3-8b-instruct:free",
+  "mattshumer/reflection-70b:free",
+  "nousresearch/hermes-3-llama-3.1-405b"
+];
+
+// Health check function
+async function healthCheck(): Promise<string> {
+  for (const model of models) {
+    try {
+      await openai.chat.completions.create({
+        model: model,
+        messages: [{ role: "user", content: "Hello" }],
+        max_tokens: 1
+      });
+      console.log(`Model ${model} is available.`);
+      return model;
+    } catch (error) {
+      console.error(`Error with model ${model}:`, error.message);
+    }
+  }
+  throw new Error("No models are currently available.");
+}
+
 // Retry function with exponential backoff
 async function retryWithBackoff<T>(
   fn: () => Promise<T>,
@@ -49,11 +76,12 @@ export async function handleAIAssist(ctx: Context) {
   }
 
   try {
+    const availableModel = await healthCheck();
     const stream = new ReadableStream({
       async start(controller) {
         try {
           const completion = await retryWithBackoff(() => openai.chat.completions.create({
-            model: "nousresearch/hermes-3-llama-3.1-405b", // Changed to a non-experimental model
+            model: availableModel,
             messages: [
               { 
                 role: "system", 
@@ -74,6 +102,8 @@ export async function handleAIAssist(ctx: Context) {
    - Encourage engagement (e.g., comments, likes, shares)
    - Ask a question or prompt discussion
    - Provide a clear next step for readers
+
+4. Add information about the AI model from parameter model: availableModel, and the user's prompt at the end of the post.
 
 General Guidelines:
 - Use simple, professional English
@@ -118,32 +148,4 @@ Please format the improved post clearly, separating the Headline, Body, and Call
     ctx.response.status = 500;
     ctx.response.body = { error: 'Error processing AI request' };
   }
-}
-
-function simplifyLanguage(text: string): string {
-  const simplifications: [RegExp, string][] = [
-    [/\b(utilize|implement|leverage)\b/g, 'use'],
-    [/\b(commence|initiate)\b/g, 'start'],
-    [/\b(terminate|conclude)\b/g, 'end'],
-    [/\b(obtain|acquire)\b/g, 'get'],
-    [/\b(sufficient)\b/g, 'enough'],
-    [/\b(numerous)\b/g, 'many'],
-    [/\b(facilitate)\b/g, 'help'],
-    [/\b(endeavor|attempt)\b/g, 'try'],
-    [/\b(utilize|employ)\b/g, 'use'],
-    [/\b(subsequently)\b/g, 'then'],
-    [/\b(ascertain)\b/g, 'find out'],
-    [/\b(cognizant|mindful)\b/g, 'aware'],
-    [/\b(expedite|accelerate)\b/g, 'speed up'],
-    [/\b(optimal|optimum)\b/g, 'best'],
-    [/\b(necessitate|mandate)\b/g, 'require'],
-    [/\b(amalgamate|coalesce)\b/g, 'combine'],
-    [/\b(elucidate)\b/g, 'explain'],
-    [/\b(promulgate)\b/g, 'announce'],
-    [/\b(substantiate)\b/g, 'prove'],
-    [/\b(utilize|employ)\b/g, 'use'],
-  ];
-
-  return simplifications.reduce((result, [pattern, replacement]) => 
-    result.replace(pattern, replacement), text);
 }

@@ -204,6 +204,13 @@ async function getAIAssistance() {
     aiAssistSuccessful = true;
   } catch (error) {
     console.error('Error getting AI assistance:', error);
+    let errorMessage = 'AI assistance failed';
+    if (error.message.includes('No models are currently available')) {
+      errorMessage = 'All AI models are currently unavailable. Please try again later.';
+    } else {
+      errorMessage += `: ${error.message}`;
+    }
+    showNotification(errorMessage, 'error');
   } finally {
     // Hide loading indicator and re-enable button
     aiLoading.classList.add('opacity-0');
