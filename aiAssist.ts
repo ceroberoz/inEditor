@@ -102,14 +102,14 @@ export async function handleAIAssist(ctx: Context) {
    - Ask a question or prompt discussion
    - Provide a clear next step for readers
 
-4. Add information about the AI model from parameter model: availableModel, and the user's prompt at the end of the post.
-
 General Guidelines:
 - Use simple, professional English
 - Maintain a friendly and approachable tone
 - Keep the total post under 1,300 characters
 - Use line breaks between sections for clarity
 - Include 2-3 relevant hashtags at the end
+
+4. Add information about the AI model from parameter model: ${availableModel}, and the user's prompt at the end of the post.
 
 Please format the improved post clearly, separating the Headline, Body, and Call to Action sections.`
               },
@@ -118,8 +118,11 @@ Please format the improved post clearly, separating the Headline, Body, and Call
                 content: `Please help me improve this LinkedIn post: ${prompt}` 
               }
             ],
-            temperature: 0.7,
-            max_tokens: 1000,
+            temperature: 0.5,
+            max_tokens: 800,
+            top_p: 0.9,
+            frequency_penalty: 0.5,
+            presence_penalty: 0.5,
             stream: true,
           }));
 
