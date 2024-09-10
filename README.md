@@ -1,12 +1,32 @@
 # inEditor: LinkedIn Post Enhancer 📝✨
 
-![inEditor in action](https://github.com/ceroberoz/inEditor/blob/meong/capture.png "inEditor - Beta2 Release")
-
 inEditor is a powerful tool that helps you create better-looking LinkedIn posts with text styling options and AI-powered suggestions. Now with improved AI functionality and multiple model support!
+
+![inEditor in action](https://github.com/ceroberoz/inEditor/blob/meong/capture.png "inEditor - Beta2 Release")
 
 **Try it now**: https://ineditor.deno.dev/
 
+## Getting Started
+
+1. Clone this repository:
+   ```
+   git clone https://github.com/yourusername/inEditor.git
+   cd inEditor
+   ```
+2. Install Deno if you haven't already: [Deno Installation Guide](https://deno.land/#installation)
+3. Set up your environment variables:
+   ```
+   cp .env.example .env
+   ```
+   Then edit `.env` with your actual API keys and settings.
+4. Run the development server:
+   ```
+   deno task start
+   ```
+5. Open `http://localhost:8000` in your browser.
+
 ## Features
+
 - Text styling: **Bold**, *Italic*, Underline, ~~Strikethrough~~
 - One-click copy button
 - Numbered and bullet point lists
@@ -16,13 +36,15 @@ inEditor is a powerful tool that helps you create better-looking LinkedIn posts 
 - Responsive design
 
 ## Tech Stack
-- Deno
-- Oak (web framework for Deno)
-- OpenAI API (via OpenRouter)
-- Quill.js (rich text editor)
-- Tailwind CSS
+
+- [Deno](https://deno.land/): A secure runtime for JavaScript and TypeScript
+- [Oak](https://oakserver.github.io/oak/): A middleware framework for Deno's http server
+- [OpenAI API](https://platform.openai.com/docs/api-reference) (via [OpenRouter](https://openrouter.ai/docs)): For AI-powered suggestions
+- [Quill.js](https://quilljs.com/): Rich text editor
+- [Tailwind CSS](https://tailwindcss.com/): Utility-first CSS framework
 
 ## AI Functionality
+
 We've separated the AI functionality into its own module (`aiAssist.ts`) for better organization and maintainability. Key improvements include:
 
 - Multiple AI models with prioritization
@@ -40,28 +62,37 @@ Our AI models include:
 
 Each model has its strengths, ensuring high-quality post suggestions across various topics and styles.
 
-## Quick Start for Development
-1. Clone this repo
-2. Navigate to the project directory
-3. Copy `.env.example` to `.env` and add your API keys
-4. Run `deno task start` to start the development server
-5. Open `http://localhost:3000` in your browser
-
-## Environment Variables
-- `OPENROUTER_API_KEY`: Your OpenRouter API key
-- `YOUR_SITE_URL`: Your site's URL (for OpenRouter rankings)
-- `YOUR_SITE_NAME`: Your site's name (for OpenRouter rankings)
-
 ## Project Structure
+
 - `main.ts`: Main application file
 - `aiAssist.ts`: AI service for post improvements
 - `public/`: Static files (CSS, JavaScript, images)
 - `views/`: EJS templates
 
+## Environment Variables
+
+- `OPENROUTER_API_KEY`: Your OpenRouter API key
+- `YOUR_SITE_URL`: Your site's URL (for OpenRouter rankings)
+- `YOUR_SITE_NAME`: Your site's name (for OpenRouter rankings)
+
 ## Contributing
+
 Contributions are welcome! Please feel free to submit a Pull Request.
 
+### Development Exercises
+
+1. Add a new AI model to the `models` array in `aiAssist.ts`.
+2. Implement a new text styling option in the Quill editor.
+3. Create a new API endpoint for user feedback on AI suggestions.
+
+## Troubleshooting
+
+- If you're having issues with API keys, make sure they're correctly set in your `.env` file.
+- For CORS errors, check that your `ALLOWED_ORIGINS` in the `.env` file includes your frontend URL.
+- If an AI model is consistently failing, try adjusting the order in the `models` array in `aiAssist.ts`.
+
 ## License
+
 This project is open source and available under the [MIT License](LICENSE).
 
 ---
