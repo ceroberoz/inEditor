@@ -1,6 +1,7 @@
 import { Context } from "https://deno.land/x/oak@v12.6.1/mod.ts";
 import OpenAI from "https://deno.land/x/openai@v4.20.1/mod.ts";
 import { config } from "https://deno.land/x/dotenv@v3.2.2/mod.ts";
+import { OpenAIError } from "https://deno.land/x/openai@v4.20.1/mod.ts";
 
 // Load environment variables
 await config({ export: true });
@@ -31,7 +32,37 @@ const models = [
   "mattshumer/reflection-70b:free"
 ];
 
-// Health check function
+// System message template for LinkedIn post creation
+const SYSTEM_MESSAGE = `You are an expert LinkedIn post creator. Your task is to improve or create LinkedIn posts with the following structure:
+
+1. Headline (1 line):
+   - Attention-grabbing and relevant to the content
+   - Use emojis sparingly if appropriate
+
+2. Body (3-5 paragraphs):
+   - Start with a hook or interesting fact
+   - Present the main content or idea clearly
+   - Use short paragraphs for readability
+   - Include relevant personal experiences or insights
+   - Use bullet points or numbered lists for easy scanning
+
+3. Call to Action (1-2 lines):
+   - Encourage engagement (e.g., comments, likes, shares)
+   - Ask a question or prompt discussion
+   - Provide a clear next step for readers
+
+General Guidelines:
+- Use simple, professional English
+- Maintain a friendly and approachable tone
+- Keep the total post under 1,300 characters
+- Use line breaks between sections for clarity
+- Include 2-3 relevant hashtags at the end
+
+4. Add information about the AI model used: {model}, and the user's prompt at the end of the post.
+
+Please format the improved post clearly, separating the Headline, Body, and Call to Action sections.`;
+
+// Health check function to find an available model
 async function healthCheck(): Promise<string> {
   for (const model of models) {
     try {
@@ -72,6 +103,7 @@ async function retryWithBackoff<T>(
   }
 }
 
+// Main handler for AI assistance
 export async function handleAIAssist(ctx: Context) {
   if (ctx.request.headers.get("content-type") !== "application/json") {
     ctx.response.status = 415;
@@ -89,7 +121,9 @@ export async function handleAIAssist(ctx: Context) {
   }
 
   try {
+    // Get an available model
     const availableModel = await healthCheck();
+
     const stream = new ReadableStream({
       async start(controller) {
         try {
@@ -98,34 +132,7 @@ export async function handleAIAssist(ctx: Context) {
             messages: [
               { 
                 role: "system", 
-                content: `You are an expert LinkedIn post creator. Your task is to improve or create LinkedIn posts with the following structure:
-
-1. Headline (1 line):
-   - Attention-grabbing and relevant to the content
-   - Use emojis sparingly if appropriate
-
-2. Body (3-5 paragraphs):
-   - Start with a hook or interesting fact
-   - Present the main content or idea clearly
-   - Use short paragraphs for readability
-   - Include relevant personal experiences or insights
-   - Use bullet points or numbered lists for easy scanning
-
-3. Call to Action (1-2 lines):
-   - Encourage engagement (e.g., comments, likes, shares)
-   - Ask a question or prompt discussion
-   - Provide a clear next step for readers
-
-General Guidelines:
-- Use simple, professional English
-- Maintain a friendly and approachable tone
-- Keep the total post under 1,300 characters
-- Use line breaks between sections for clarity
-- Include 2-3 relevant hashtags at the end
-
-4. Add information about the AI model from parameter model: ${availableModel}, and the user's prompt at the end of the post.
-
-Please format the improved post clearly, separating the Headline, Body, and Call to Action sections.`
+                content: SYSTEM_MESSAGE.replace("{model}", availableModel)
               },
               { 
                 role: "user", 
@@ -140,6 +147,7 @@ Please format the improved post clearly, separating the Headline, Body, and Call
             stream: true,
           }));
 
+          // Stream the response
           for await (const chunk of completion) {
             const content = chunk.choices[0]?.delta?.content || '';
             if (content) {
@@ -148,11 +156,7 @@ Please format the improved post clearly, separating the Headline, Body, and Call
           }
         } catch (error) {
           console.error('Error in AI assist:', error);
-          if (error instanceof OpenAI.APIError) {
-            controller.enqueue(new TextEncoder().encode(`Error: ${error.message}`));
-          } else {
-            controller.enqueue(new TextEncoder().encode('Error: Unexpected error occurred'));
-          }
+          handleError(ctx, error);
         } finally {
           controller.close();
         }
@@ -163,6 +167,7 @@ Please format the improved post clearly, separating the Headline, Body, and Call
       }
     });
 
+    // Set response headers for streaming
     ctx.response.type = 'text/event-stream';
     ctx.response.headers.set('Cache-Control', 'no-cache');
     ctx.response.headers.set('Connection', 'keep-alive');
@@ -171,5 +176,16 @@ Please format the improved post clearly, separating the Headline, Body, and Call
     console.error('Error in AI assist:', error);
     ctx.response.status = 500;
     ctx.response.body = { error: 'Error processing AI request' };
+  }
+}
+
+// Helper function to handle errors
+function handleError(ctx: Context, error: any) {
+  if (error instanceof OpenAIError) {
+    ctx.response.status = error.status || 500;
+    ctx.response.body = { error: error.message };
+  } else {
+    ctx.response.status = 500;
+    ctx.response.body = { error: 'Unexpected error occurred' };
   }
 }
