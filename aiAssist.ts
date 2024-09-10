@@ -20,8 +20,7 @@ const models = [
   "google/gemma-2-9b-it:free",
   "nousresearch/hermes-3-llama-3.1-405b",
   "meta-llama/llama-3-8b-instruct:free",
-  "mattshumer/reflection-70b:free",
-  "nousresearch/hermes-3-llama-3.1-405b"
+  "mattshumer/reflection-70b:free"
 ];
 
 // Health check function
