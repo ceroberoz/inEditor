@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "bleu": "^0.0.0",
+    "natural": "^8.0.1",
+    "openai": "^4.58.2",
+    "string-similarity": "^4.0.4"
+  }
+}

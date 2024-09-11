@@ -188,18 +188,12 @@ async function getAIAssistance() {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const reader = response.body.getReader();
-    let improvedText = '';
+    const data = await response.json(); // Get the JSON response
+    const improvedText = data.bestResponse; // Access the bestResponse directly
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      improvedText += new TextDecoder().decode(value);
-      
-      // Update the editor content in real-time
-      quill.setText('');
-      quill.clipboard.dangerouslyPasteHTML(0, improvedText.replace(/\n/g, '<br>'));
-    }
+    // Update the editor content with the improved text
+    quill.setText('');
+    quill.clipboard.dangerouslyPasteHTML(0, improvedText.replace(/\n/g, '<br>'));
 
     aiAssistSuccessful = true;
   } catch (error) {

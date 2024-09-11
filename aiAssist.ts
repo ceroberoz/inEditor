@@ -26,14 +26,14 @@ const openai = new OpenAI({
 
 // Define the models in order of preference
 const models = [
-  "google/gemini-pro-1.5-exp", // Likely the best overall for quality and contextual understanding, ideal for engaging LinkedIn posts.
-  "meta-llama/llama-3-8b-instruct:free", // Strong instruction-following and balanced performance, good for coherent content.
-  "mistralai/mistral-7b-instruct:free", // Reliable and accessible with good instruction-following capabilities.
-  "mattshumer/reflection-70b:free", // Large model that can generate detailed content but may overcomplicate posts.
-  "google/gemma-2-9b-it:free", // A smaller variant within the Google family, still strong but not as prioritized as the pro version.
-  "microsoft/phi-3-medium-128k-instruct:free", // Good for straightforward and structured posts, solid performance.
-  "openchat/openchat-7b:free", // More general-purpose and smaller, suitable for less demanding content tasks.
-  "nousresearch/hermes-3-llama-3.1-405b" // Potentially powerful but less tailored for LinkedIn content, needs testing.
+  // "google/gemini-pro-1.5-exp",
+  "meta-llama/llama-3-8b-instruct:free",
+  "mistralai/mistral-7b-instruct:free",
+  // "mattshumer/reflection-70b:free",
+  "google/gemma-2-9b-it:free",
+  // "microsoft/phi-3-medium-128k-instruct:free",
+  // "openchat/openchat-7b:free",
+  // "nousresearch/hermes-3-llama-3.1-405b"
 ];
 
 // System message template for LinkedIn post creation
@@ -73,6 +73,42 @@ Topic: {prompt}
 
 Can you help me create an engaging post with this concept?
 `;
+
+// Function to calculate Jaccard Similarity
+function jaccardSimilarity(a: string, b: string): number {
+  const setA = new Set(a.split(" "));
+  const setB = new Set(b.split(" "));
+  const intersection = new Set([...setA].filter(x => setB.has(x)));
+  const union = new Set([...setA, ...setB]);
+  return intersection.size / union.size;
+}
+
+// Function to calculate Cosine Similarity
+function cosineSimilarity(a: string, b: string): number {
+  const wordsA = a.split(" ");
+  const wordsB = b.split(" ");
+  const setA = new Set(wordsA);
+  const setB = new Set(wordsB);
+  const intersection = [...setA].filter(word => setB.has(word)).length;
+  return intersection / Math.sqrt(setA.size * setB.size);
+}
+
+// Function to evaluate the AI response using multiple metrics
+function evaluateResponse(response: string, referenceResponse: string): number {
+  try {
+    const lengthScore = Math.min(response.length / referenceResponse.length, 1); // Normalize length
+    const jaccardScore = jaccardSimilarity(referenceResponse, response);
+    const cosineScore = cosineSimilarity(referenceResponse, response);
+
+    // Combine scores (adjust weights as needed)
+    const combinedScore = (lengthScore + jaccardScore + cosineScore) / 3; // Normalize if needed
+
+    return combinedScore;
+  } catch (error) {
+    console.error("Error during evaluation:", error);
+    return 0; // Return zero score on failure
+  }
+}
 
 // Health check function to find an available model
 async function healthCheck(): Promise<string> {
@@ -170,6 +206,7 @@ async function setCachedResponse(prompt: string, response: string): Promise<void
 }
 
 // Main handler for AI assistance
+// Main handler for AI assistance
 export async function handleAIAssist(ctx: Context) {
   if (ctx.request.headers.get("content-type") !== "application/json") {
     ctx.response.status = 415;
@@ -195,63 +232,61 @@ export async function handleAIAssist(ctx: Context) {
     }
 
     // Get an available model
-    const availableModel = await healthCheck();
+    const availableModels = models.slice(0, 3); // Limit to the first three models
+    const modelResponses = [];
 
-    const stream = new ReadableStream({
-      async start(controller) {
-        try {
-          const completion = await retryWithBackoff(() => openai.chat.completions.create({
-            model: availableModel,
-            messages: [
-              { 
-                role: "system", 
-                content: SYSTEM_MESSAGE.replace("{model}", availableModel)
-              },
-              { 
-                role: "user", 
-                content: USER_PROMPT.replace("{prompt}", prompt)
-              }
-            ],
-            temperature: 0.5,
-            max_tokens: 800,
-            top_p: 0.9,
-            frequency_penalty: 0.5,
-            presence_penalty: 0.5,
-            stream: true,
-          }));
-
-          let fullResponse = '';
-
-          // Stream the response
-          for await (const chunk of completion) {
-            const content = chunk.choices[0]?.delta?.content || '';
-            if (content) {
-              fullResponse += content;
-              controller.enqueue(new TextEncoder().encode(content));
+    for (const model of availableModels) {
+      try {
+        const completion = await retryWithBackoff(() => openai.chat.completions.create({
+          model: model,
+          messages: [
+            { 
+              role: "system", 
+              content: SYSTEM_MESSAGE.replace("{model}", model)
+            },
+            { 
+              role: "user", 
+              content: USER_PROMPT.replace("{prompt}", prompt)
             }
-          }
+          ],
+          temperature: 0.5,
+          max_tokens: 800,
+          top_p: 0.9,
+          frequency_penalty: 0.5,
+          presence_penalty: 0.5,
+          stream: false, // Disable streaming
+        }));
 
-          // Cache the full response
-          await setCachedResponse(prompt, fullResponse);
+        const fullResponse = completion.choices[0]?.message?.content || '';
+        modelResponses.push({ model, response: fullResponse }); // Store model response
 
-        } catch (error) {
-          console.error('Error in AI assist:', error);
-          handleError(ctx, error);
-        } finally {
-          controller.close();
-        }
-      },
-      cancel() {
-        // Handle client disconnection
-        console.log('Client disconnected');
+      } catch (error) {
+        console.error(`Error with model ${model}:`, error.message);
       }
+    }
+
+    // Log all model responses before final evaluation
+    console.log('All Model Responses:');
+    modelResponses.forEach(({ model, response }) => {
+      console.log(`Model ${model} response: ${response}`);
     });
 
-    // Set response headers for streaming
-    ctx.response.type = 'text/event-stream';
-    ctx.response.headers.set('Cache-Control', 'no-cache');
-    ctx.response.headers.set('Connection', 'keep-alive');
-    ctx.response.body = stream;
+    // Evaluate responses against a reference response
+    const referenceResponse = USER_PROMPT;
+    const scores = modelResponses.map(({ response }) => evaluateResponse(response, referenceResponse));
+
+    scores.forEach((score, index) => {
+      console.log(`Response score for model ${availableModels[index]}: ${score}`);
+    });
+
+    // Send the best response back to the client
+    const bestIndex = scores.reduce((bestIdx, score, idx) => (score > scores[bestIdx] ? idx : bestIdx), 0);
+    ctx.response.body = {
+      bestModel: availableModels[bestIndex],
+      bestResponse: modelResponses[bestIndex].response,
+      scores: scores,
+    };
+
   } catch (error) {
     console.error('Error in AI assist:', error);
     ctx.response.status = 500;

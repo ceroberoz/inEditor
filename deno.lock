@@ -711,5 +711,15 @@
     "https://deno.land/x/openai@v4.20.1/uploads.ts": "96dbd9e7e7b5a9bc3ff38e81f6c1372c2cdce28b38c704cd61c7daeb5494b6f9",
     "https://deno.land/x/openai@v4.20.1/version.ts": "55cb1dcb3480047da666ac02403f7174e8b5c072c4e8483a56e4eab96da13757",
     "https://deno.land/x/path_to_regexp@v6.2.1/index.ts": "894060567837bae8fc9c5cbd4d0a05e9024672083d5883b525c031eea940e556"
+  },
+  "workspace": {
+    "packageJson": {
+      "dependencies": [
+        "npm:bleu@^0.0.0",
+        "npm:natural@^8.0.1",
+        "npm:openai@^4.58.2",
+        "npm:string-similarity@^4.0.4"
+      ]
+    }
   }
 }
