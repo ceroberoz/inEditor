@@ -193,6 +193,15 @@ async function setCachedResponse(
   }
 }
 
+// New function to combine responses
+function combineResponses(
+  modelResponses: Array<{ model: string; response: string }>,
+): string {
+  return modelResponses
+    .map(({ model, response }) => `${model} response:\n${response}\n\n`)
+    .join("");
+}
+
 // Main handler for AI assistance
 export async function handleAIAssist(ctx: Context) {
   if (ctx.request.headers.get("content-type") !== "application/json") {
@@ -259,7 +268,7 @@ export async function handleAIAssist(ctx: Context) {
 
     console.log("All Model Responses:");
     modelResponses.forEach(({ model, response }) => {
-      console.log(`Model ${model} response: ${response}`);
+      console.log(`Model ${model} response:\n${response}\n`);
     });
 
     // Evaluate responses against a reference response
@@ -268,27 +277,71 @@ export async function handleAIAssist(ctx: Context) {
       evaluateResponse(response, referenceResponse),
     );
 
+    console.log("Scores for each model:");
     scores.forEach((score, index) => {
-      console.log(
-        `Response score for model ${availableModels[index]}: ${score}`,
-      );
+      console.log(`${availableModels[index]}: ${score}`);
     });
 
-    // Send the best response back to the client
+    // Find the index of the highest-scoring model
     const bestIndex = scores.reduce(
       (bestIdx, score, idx) => (score > scores[bestIdx] ? idx : bestIdx),
       0,
     );
-    const bestResponse = modelResponses[bestIndex].response;
+
+    // Combine all responses
+    const combinedResponses = combineResponses(modelResponses);
+    console.log("Combined Responses:\n", combinedResponses);
+
+    // Create a new prompt for the final draft
+    const finalPrompt = `
+Here are responses from multiple AI models to the following prompt:
+"${prompt}"
+
+Combined responses:
+${combinedResponses}
+
+Based on these responses, please create a final, improved LinkedIn post that incorporates the best elements from each response.
+`;
+
+    console.log("Final Prompt for Best Model:\n", finalPrompt);
+
+    // Use the highest-scoring model to create the final draft
+    const bestModel = availableModels[bestIndex];
+    console.log(`Using best model: ${bestModel} for final draft`);
+
+    const finalCompletion = await retryWithBackoff(() =>
+      openai.chat.completions.create({
+        model: bestModel,
+        messages: [
+          {
+            role: "system",
+            content: SYSTEM_MESSAGE.replace("{model}", bestModel),
+          },
+          {
+            role: "user",
+            content: finalPrompt,
+          },
+        ],
+        temperature: 0.5,
+        max_tokens: 800,
+        top_p: 0.9,
+        frequency_penalty: 0.5,
+        presence_penalty: 0.5,
+        stream: false,
+      }),
+    );
+
+    const finalResponse = finalCompletion.choices[0]?.message?.content || "";
+    console.log("Final Response:\n", finalResponse);
 
     ctx.response.body = {
-      bestModel: availableModels[bestIndex],
-      bestResponse: bestResponse,
+      bestModel: bestModel,
+      bestResponse: finalResponse,
       scores: scores,
     };
 
-    // Cache the best response
-    await setCachedResponse(prompt, bestResponse);
+    // Cache the final response
+    await setCachedResponse(prompt, finalResponse);
   } catch (error) {
     console.error("Error in AI assist:", error);
     if (error instanceof OpenAIError) {
