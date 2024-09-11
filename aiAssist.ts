@@ -36,7 +36,6 @@ const models = [
   "nousresearch/hermes-3-llama-3.1-405b" // Potentially powerful but less tailored for LinkedIn content, needs testing.
 ];
 
-
 // System message template for LinkedIn post creation
 const SYSTEM_MESSAGE = `You are an expert LinkedIn post creator. Your task is to improve or create LinkedIn posts with the following structure:
 
@@ -116,6 +115,60 @@ async function retryWithBackoff<T>(
   }
 }
 
+// Cache expiration time (24 hours)
+const CACHE_EXPIRATION = 24 * 60 * 60 * 1000;
+
+// Initialize Deno KV (if available)
+let kv;
+if (typeof Deno.openKv === "function") {
+  try {
+    kv = await Deno.openKv();
+    console.log("Deno KV is available and initialized.");
+  } catch (error) {
+    console.error("Error initializing Deno KV:", error);
+  }
+} else {
+  console.warn("Deno KV is not available in this environment.");
+}
+
+// Function to get cached response
+async function getCachedResponse(prompt: string): Promise<string | null> {
+  if (!kv) return null;
+
+  const cacheKey = ["ai_assist", prompt];
+  try {
+    const cachedResult = await kv.get(cacheKey);
+    if (cachedResult.value) {
+      const { response, timestamp } = cachedResult.value;
+      if (Date.now() - timestamp < CACHE_EXPIRATION) {
+        console.log("Cache hit for prompt:", prompt);
+        return response;
+      }
+    }
+  } catch (error) {
+    console.error("Error reading from cache:", error);
+  }
+  return null;
+}
+
+// Function to set cached response
+async function setCachedResponse(prompt: string, response: string): Promise<void> {
+  if (!kv) return;
+
+  const cacheKey = ["ai_assist", prompt];
+  try {
+    const result = await kv.atomic()
+      .set(cacheKey, { response, timestamp: Date.now() }, { expireIn: CACHE_EXPIRATION })
+      .commit();
+
+    if (!result.ok) {
+      console.warn('Cache update failed');
+    }
+  } catch (error) {
+    console.error("Error writing to cache:", error);
+  }
+}
+
 // Main handler for AI assistance
 export async function handleAIAssist(ctx: Context) {
   if (ctx.request.headers.get("content-type") !== "application/json") {
@@ -134,6 +187,13 @@ export async function handleAIAssist(ctx: Context) {
   }
 
   try {
+    // Check cache first
+    const cachedResponse = await getCachedResponse(prompt);
+    if (cachedResponse) {
+      ctx.response.body = cachedResponse;
+      return;
+    }
+
     // Get an available model
     const availableModel = await healthCheck();
 
@@ -160,13 +220,20 @@ export async function handleAIAssist(ctx: Context) {
             stream: true,
           }));
 
+          let fullResponse = '';
+
           // Stream the response
           for await (const chunk of completion) {
             const content = chunk.choices[0]?.delta?.content || '';
             if (content) {
+              fullResponse += content;
               controller.enqueue(new TextEncoder().encode(content));
             }
           }
+
+          // Cache the full response
+          await setCachedResponse(prompt, fullResponse);
+
         } catch (error) {
           console.error('Error in AI assist:', error);
           handleError(ctx, error);
