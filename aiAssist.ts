@@ -6,7 +6,11 @@ import { OpenAIError } from "https://deno.land/x/openai@v4.20.1/mod.ts";
 // Load environment variables
 await config({ export: true });
 
-const REQUIRED_ENV_VARS = ['OPENROUTER_API_KEY', 'YOUR_SITE_URL', 'YOUR_SITE_NAME'];
+const REQUIRED_ENV_VARS = [
+  "OPENROUTER_API_KEY",
+  "YOUR_SITE_URL",
+  "YOUR_SITE_NAME",
+];
 for (const envVar of REQUIRED_ENV_VARS) {
   if (!Deno.env.get(envVar)) {
     throw new Error(`Missing required environment variable: ${envVar}`);
@@ -26,14 +30,9 @@ const openai = new OpenAI({
 
 // Define the models in order of preference
 const models = [
-  // "google/gemini-pro-1.5-exp",
   "meta-llama/llama-3-8b-instruct:free",
   "mistralai/mistral-7b-instruct:free",
-  // "mattshumer/reflection-70b:free",
   "google/gemma-2-9b-it:free",
-  // "microsoft/phi-3-medium-128k-instruct:free",
-  // "openchat/openchat-7b:free",
-  // "nousresearch/hermes-3-llama-3.1-405b"
 ];
 
 // System message template for LinkedIn post creation
@@ -67,7 +66,7 @@ General Guidelines:
 Please format the improved post clearly, separating the Headline, Body, and Call to Action sections.`;
 
 // Prompt for the user
-const USER_PROMPT = `Please help me improve this LinkedIn post: 
+const USER_PROMPT = `Please help me improve this LinkedIn post:
 
 Topic: {prompt}
 
@@ -78,7 +77,7 @@ Can you help me create an engaging post with this concept?
 function jaccardSimilarity(a: string, b: string): number {
   const setA = new Set(a.split(" "));
   const setB = new Set(b.split(" "));
-  const intersection = new Set([...setA].filter(x => setB.has(x)));
+  const intersection = new Set([...setA].filter((x) => setB.has(x)));
   const union = new Set([...setA, ...setB]);
   return intersection.size / union.size;
 }
@@ -89,50 +88,31 @@ function cosineSimilarity(a: string, b: string): number {
   const wordsB = b.split(" ");
   const setA = new Set(wordsA);
   const setB = new Set(wordsB);
-  const intersection = [...setA].filter(word => setB.has(word)).length;
+  const intersection = [...setA].filter((word) => setB.has(word)).length;
   return intersection / Math.sqrt(setA.size * setB.size);
 }
 
 // Function to evaluate the AI response using multiple metrics
 function evaluateResponse(response: string, referenceResponse: string): number {
   try {
-    const lengthScore = Math.min(response.length / referenceResponse.length, 1); // Normalize length
+    const lengthScore = Math.min(response.length / referenceResponse.length, 1);
     const jaccardScore = jaccardSimilarity(referenceResponse, response);
     const cosineScore = cosineSimilarity(referenceResponse, response);
 
-    // Combine scores (adjust weights as needed)
-    const combinedScore = (lengthScore + jaccardScore + cosineScore) / 3; // Normalize if needed
+    const combinedScore = (lengthScore + jaccardScore + cosineScore) / 3;
 
     return combinedScore;
   } catch (error) {
     console.error("Error during evaluation:", error);
-    return 0; // Return zero score on failure
+    return 0;
   }
-}
-
-// Health check function to find an available model
-async function healthCheck(): Promise<string> {
-  for (const model of models) {
-    try {
-      await openai.chat.completions.create({
-        model: model,
-        messages: [{ role: "user", content: "Hello" }],
-        max_tokens: 1
-      });
-      console.log(`Model ${model} is available.`);
-      return model;
-    } catch (error) {
-      console.error(`Error with model ${model}:`, error.message);
-    }
-  }
-  throw new Error("No models are currently available.");
 }
 
 // Retry function with exponential backoff
 async function retryWithBackoff<T>(
   fn: () => Promise<T>,
   maxRetries = 3,
-  initialDelay = 1000
+  initialDelay = 1000,
 ): Promise<T> {
   let retries = 0;
   while (true) {
@@ -142,7 +122,7 @@ async function retryWithBackoff<T>(
       if (error.status === 429 && retries < maxRetries) {
         const delay = initialDelay * Math.pow(2, retries);
         console.log(`Rate limited. Retrying in ${delay}ms...`);
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise((resolve) => setTimeout(resolve, delay));
         retries++;
       } else {
         throw error;
@@ -188,24 +168,31 @@ async function getCachedResponse(prompt: string): Promise<string | null> {
 }
 
 // Function to set cached response
-async function setCachedResponse(prompt: string, response: string): Promise<void> {
+async function setCachedResponse(
+  prompt: string,
+  response: string,
+): Promise<void> {
   if (!kv) return;
 
   const cacheKey = ["ai_assist", prompt];
   try {
-    const result = await kv.atomic()
-      .set(cacheKey, { response, timestamp: Date.now() }, { expireIn: CACHE_EXPIRATION })
+    const result = await kv
+      .atomic()
+      .set(
+        cacheKey,
+        { response, timestamp: Date.now() },
+        { expireIn: CACHE_EXPIRATION },
+      )
       .commit();
 
     if (!result.ok) {
-      console.warn('Cache update failed');
+      console.warn("Cache update failed");
     }
   } catch (error) {
     console.error("Error writing to cache:", error);
   }
 }
 
-// Main handler for AI assistance
 // Main handler for AI assistance
 export async function handleAIAssist(ctx: Context) {
   if (ctx.request.headers.get("content-type") !== "application/json") {
@@ -217,9 +204,9 @@ export async function handleAIAssist(ctx: Context) {
   const body = await ctx.request.body().value;
   const { prompt } = body;
 
-  if (!prompt || typeof prompt !== 'string' || prompt.length > 1000) {
+  if (!prompt || typeof prompt !== "string" || prompt.length > 1000) {
     ctx.response.status = 400;
-    ctx.response.body = { error: 'Invalid prompt' };
+    ctx.response.body = { error: "Invalid prompt" };
     return;
   }
 
@@ -227,70 +214,90 @@ export async function handleAIAssist(ctx: Context) {
     // Check cache first
     const cachedResponse = await getCachedResponse(prompt);
     if (cachedResponse) {
-      ctx.response.body = cachedResponse;
+      ctx.response.body = {
+        bestModel: "cached",
+        bestResponse: cachedResponse,
+        scores: [1], // or any placeholder value
+      };
       return;
     }
 
     // Get an available model
-    const availableModels = models.slice(0, 3); // Limit to the first three models
-    const modelResponses = [];
+    const availableModels = models.slice(0, 3);
+    const modelResponses: Array<{ model: string; response: string }> = [];
 
     for (const model of availableModels) {
       try {
-        const completion = await retryWithBackoff(() => openai.chat.completions.create({
-          model: model,
-          messages: [
-            { 
-              role: "system", 
-              content: SYSTEM_MESSAGE.replace("{model}", model)
-            },
-            { 
-              role: "user", 
-              content: USER_PROMPT.replace("{prompt}", prompt)
-            }
-          ],
-          temperature: 0.5,
-          max_tokens: 800,
-          top_p: 0.9,
-          frequency_penalty: 0.5,
-          presence_penalty: 0.5,
-          stream: false, // Disable streaming
-        }));
+        const completion = await retryWithBackoff(() =>
+          openai.chat.completions.create({
+            model: model,
+            messages: [
+              {
+                role: "system",
+                content: SYSTEM_MESSAGE.replace("{model}", model),
+              },
+              {
+                role: "user",
+                content: USER_PROMPT.replace("{prompt}", prompt),
+              },
+            ],
+            temperature: 0.5,
+            max_tokens: 800,
+            top_p: 0.9,
+            frequency_penalty: 0.5,
+            presence_penalty: 0.5,
+            stream: false,
+          }),
+        );
 
-        const fullResponse = completion.choices[0]?.message?.content || '';
-        modelResponses.push({ model, response: fullResponse }); // Store model response
-
+        const fullResponse = completion.choices[0]?.message?.content || "";
+        modelResponses.push({ model, response: fullResponse });
       } catch (error) {
         console.error(`Error with model ${model}:`, error.message);
       }
     }
 
-    // Log all model responses before final evaluation
-    console.log('All Model Responses:');
+    console.log("All Model Responses:");
     modelResponses.forEach(({ model, response }) => {
       console.log(`Model ${model} response: ${response}`);
     });
 
     // Evaluate responses against a reference response
     const referenceResponse = USER_PROMPT;
-    const scores = modelResponses.map(({ response }) => evaluateResponse(response, referenceResponse));
+    const scores = modelResponses.map(({ response }) =>
+      evaluateResponse(response, referenceResponse),
+    );
 
     scores.forEach((score, index) => {
-      console.log(`Response score for model ${availableModels[index]}: ${score}`);
+      console.log(
+        `Response score for model ${availableModels[index]}: ${score}`,
+      );
     });
 
     // Send the best response back to the client
-    const bestIndex = scores.reduce((bestIdx, score, idx) => (score > scores[bestIdx] ? idx : bestIdx), 0);
+    const bestIndex = scores.reduce(
+      (bestIdx, score, idx) => (score > scores[bestIdx] ? idx : bestIdx),
+      0,
+    );
+    const bestResponse = modelResponses[bestIndex].response;
+
     ctx.response.body = {
       bestModel: availableModels[bestIndex],
-      bestResponse: modelResponses[bestIndex].response,
+      bestResponse: bestResponse,
       scores: scores,
     };
 
+    // Cache the best response
+    await setCachedResponse(prompt, bestResponse);
   } catch (error) {
-    console.error('Error in AI assist:', error);
-    ctx.response.status = 500;
-    ctx.response.body = { error: 'Error processing AI request' };
+    console.error("Error in AI assist:", error);
+    if (error instanceof OpenAIError) {
+      ctx.response.status = error.status || 500;
+      ctx.response.body = { error: error.message };
+    } else {
+      ctx.response.status = 500;
+      ctx.response.body = { error: "Unexpected error occurred" };
+    }
   }
 }
 
@@ -301,6 +308,6 @@ function handleError(ctx: Context, error: any) {
     ctx.response.body = { error: error.message };
   } else {
     ctx.response.status = 500;
-    ctx.response.body = { error: 'Unexpected error occurred' };
+    ctx.response.body = { error: "Unexpected error occurred" };
   }
 }
