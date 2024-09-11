@@ -9,6 +9,27 @@ import {
 // Configuration
 const MAX_TEXT_LENGTH = 3000;
 
+// Fun facts and loading messages
+const funFacts = [
+  "Did you know? LinkedIn was founded in 2002!",
+  "Fun fact: The average CEO has 930 connections on LinkedIn.",
+  "Interesting: Over 50% of LinkedIn users access the platform on mobile.",
+  "Wow! There are over 770 million LinkedIn users worldwide.",
+  "Cool fact: LinkedIn is available in 24 languages!",
+  "Did you know? Tuesday is the best day to post on LinkedIn.",
+  "Fun tidbit: The most overused word on LinkedIn profiles is 'motivated'.",
+];
+
+const loadingMessages = [
+  "Brewing some AI magic...",
+  "Channeling the power of algorithms...",
+  "Consulting the digital oracle...",
+  "Crunching numbers and spitting out words...",
+  "Teaching robots to write like humans...",
+  "Transforming your thoughts into brilliance...",
+  "Sprinkling some AI pixie dust...",
+];
+
 // Initialize Quill editor
 let quill;
 try {
@@ -29,7 +50,8 @@ try {
   console.error("Failed to initialize Quill:", error);
   const editorElement = document.getElementById("editor");
   if (editorElement) {
-    editorElement.innerHTML = '<p class="text-red-500">Failed to initialize the text editor. Please refresh the page or check your internet connection.</p>';
+    editorElement.innerHTML =
+      '<p class="text-red-500">Failed to initialize the text editor. Please refresh the page or check your internet connection.</p>';
   }
 }
 
@@ -110,7 +132,7 @@ quill.on("text-change", (delta, oldDelta, source) => {
 
   const newText = `${length} / ${MAX_TEXT_LENGTH}`;
   textCounter.textContent = newText;
-  
+
   if (length > MAX_TEXT_LENGTH) {
     textCounter.classList.add("text-red-500");
     textCounter.textContent += " (Maximum reached)";
@@ -146,92 +168,147 @@ document.getElementById("copy-button").addEventListener("click", () => {
 });
 
 // Info tooltip functionality
-const infoButton = document.getElementById('info-button');
-const infoTooltip = document.getElementById('info-tooltip');
+const infoButton = document.getElementById("info-button");
+const infoTooltip = document.getElementById("info-tooltip");
 
-infoButton.addEventListener('click', () => {
-  infoTooltip.classList.toggle('hidden');
+infoButton.addEventListener("click", () => {
+  infoTooltip.classList.toggle("hidden");
 });
 
-document.addEventListener('click', (event) => {
-  if (!infoButton.contains(event.target) && !infoTooltip.contains(event.target)) {
-    infoTooltip.classList.add('hidden');
+document.addEventListener("click", (event) => {
+  if (
+    !infoButton.contains(event.target) &&
+    !infoTooltip.contains(event.target)
+  ) {
+    infoTooltip.classList.add("hidden");
   }
 });
 
 // AI Assist functionality
 async function getAIAssistance() {
-  const aiAssistButton = document.getElementById('ai-assist-button');
-  const aiAssistText = document.getElementById('ai-assist-text');
-  const aiLoading = document.getElementById('ai-loading');
-  const copyButton = document.getElementById('copy-button');
+  const aiAssistButton = document.getElementById("ai-assist-button");
+  const aiAssistText = document.getElementById("ai-assist-text");
+  const aiLoading = document.getElementById("ai-loading");
+  const copyButton = document.getElementById("copy-button");
   const currentText = quill.getText();
   const prompt = "Improve the following LinkedIn post:\n\n" + currentText;
   let aiAssistSuccessful = false;
 
   try {
     // Show loading indicator and disable button
-    aiLoading.classList.remove('opacity-0');
-    aiAssistText.classList.add('opacity-0');
+    aiLoading.classList.remove("opacity-0");
+    aiAssistText.classList.add("opacity-0");
     aiAssistButton.disabled = true;
-    copyButton.style.width = '60%';
+    copyButton.style.width = "60%";
 
-    const response = await fetch('/ai-assist', {
-      method: 'POST',
+    // Start the fun notification loop
+    let notificationInterval = startFunNotificationLoop();
+
+    const response = await fetch("/ai-assist", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({ prompt }),
     });
+
+    // Stop the fun notification loop
+    clearInterval(notificationInterval);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    const data = await response.json(); // Get the JSON response
-    const improvedText = data.bestResponse; // Access the bestResponse directly
+    const data = await response.json();
+    const improvedText = data.bestResponse;
 
     // Update the editor content with the improved text
-    quill.setText('');
-    quill.clipboard.dangerouslyPasteHTML(0, improvedText.replace(/\n/g, '<br>'));
+    quill.setText("");
+    quill.clipboard.dangerouslyPasteHTML(
+      0,
+      improvedText.replace(/\n/g, "<br>"),
+    );
 
     aiAssistSuccessful = true;
   } catch (error) {
-    console.error('Error getting AI assistance:', error);
-    let errorMessage = 'AI assistance failed';
-    if (error.message.includes('No models are currently available')) {
-      errorMessage = 'All AI models are currently unavailable. Please try again later.';
+    console.error("Error getting AI assistance:", error);
+    let errorMessage = "AI assistance failed";
+    if (error.message.includes("No models are currently available")) {
+      errorMessage =
+        "All AI models are currently unavailable. Please try again later.";
     } else {
       errorMessage += `: ${error.message}`;
     }
-    showNotification(errorMessage, 'error');
+    showNotification(errorMessage, "error");
   } finally {
     // Hide loading indicator and re-enable button
-    aiLoading.classList.add('opacity-0');
-    aiAssistText.classList.remove('opacity-0');
+    aiLoading.classList.add("opacity-0");
+    aiAssistText.classList.remove("opacity-0");
     aiAssistButton.disabled = false;
-    copyButton.style.width = '70%';
+    copyButton.style.width = "70%";
 
     // Show appropriate notification and update character count
     if (aiAssistSuccessful) {
-      showNotification('Your post has been improved by AI!', 'success');
+      showNotification("Your post has been improved by AI!", "success");
       updateCharacterCount();
-    } else {
-      showNotification('Failed to get AI assistance. Please try again.', 'error');
     }
   }
 }
 
 // Add event listener to the AI Assist button
-document.getElementById('ai-assist-button').addEventListener('click', getAIAssistance);
+document
+  .getElementById("ai-assist-button")
+  .addEventListener("click", getAIAssistance);
 
-function showNotification(message, type = 'success') {
-  const notification = document.getElementById('notification');
-  notification.textContent = message;
-  notification.classList.remove('bg-green-500', 'bg-red-500');
-  notification.classList.add(type === 'success' ? 'bg-green-500' : 'bg-red-500');
-  notification.classList.remove('translate-y-full');
-  setTimeout(() => {
-    notification.classList.add('translate-y-full');
-  }, 3000);
+function startFunNotificationLoop() {
+  let messageIndex = 0;
+  let factIndex = 0;
+
+  function showNextNotification() {
+    const message = loadingMessages[messageIndex];
+    const fact = funFacts[factIndex];
+    showNotification(`${message}<br><small>${fact}</small>`, "info", 0);
+
+    messageIndex = (messageIndex + 1) % loadingMessages.length;
+    factIndex = (factIndex + 1) % funFacts.length;
+  }
+
+  showNextNotification(); // Show first notification immediately
+  return setInterval(showNextNotification, 4000); // Then every 4 seconds
+}
+
+function showNotification(message, type = "success", duration = 3000) {
+  const notification = document.getElementById("notification");
+  notification.innerHTML = message;
+  notification.classList.remove("bg-green-500", "bg-red-500", "bg-blue-500");
+  notification.classList.add(
+    type === "success"
+      ? "bg-green-500"
+      : type === "error"
+        ? "bg-red-500"
+        : "bg-blue-500",
+  );
+  notification.classList.remove("translate-y-full");
+
+  if (duration > 0) {
+    setTimeout(() => {
+      notification.classList.add("translate-y-full");
+    }, duration);
+  }
+}
+
+function updateCharacterCount() {
+  const text = quill.getText();
+  const length = text.length - 1; // Subtract 1 to account for the newline character Quill adds
+  textCounter.textContent = `${length} / ${MAX_TEXT_LENGTH}`;
+
+  if (length > MAX_TEXT_LENGTH) {
+    textCounter.classList.add("text-red-500");
+    textCounter.textContent += " (Maximum reached)";
+  } else if (length > MAX_TEXT_LENGTH * 0.9) {
+    textCounter.classList.add("text-yellow-500");
+    textCounter.textContent += " (Approaching limit)";
+  } else {
+    textCounter.classList.remove("text-red-500", "text-yellow-500");
+  }
 }
