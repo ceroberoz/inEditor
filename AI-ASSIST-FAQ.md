@@ -74,7 +74,11 @@ The AI Assist module returns a JSON response. Here's an example:
 {
   "bestModel": "meta-llama/llama-3-8b-instruct:free",
   "bestResponse": "🌟 Balancing Code and Life: The Key to Tech Career Success\n\nIn the fast-paced world of technology, it's easy to get caught up in the never-ending cycle of coding, debugging, and shipping. But here's a truth bomb: your best work comes when you're at your best self.\n\n🧘‍♂️ Why work-life balance matters in tech:\n• Prevents burnout and boosts creativity\n• Improves problem-solving skills\n• Enhances overall job satisfaction\n• Leads to better physical and mental health\n\nRemember, you're not just a developer – you're a human being with passions, relationships, and a life outside your IDE.\n\n💡 Pro tip: Set boundaries, prioritize self-care, and make time for activities that recharge you. Your code (and your future self) will thank you.\n\nWhat's your go-to method for maintaining work-life balance in your tech career? Share your tips in the comments!\n\n#TechLifeBalance #CareerWellness #DeveloperLifestyle\n\nAI model used: meta-llama/llama-3-8b-instruct:free\nUser prompt: Share insights on the importance of work-life balance in tech careers",
-  "scores": [0.85, 0.79, 0.82]
+  "scores": [
+    0.85,
+    0.79,
+    0.82
+  ]
 }
 ```
 
