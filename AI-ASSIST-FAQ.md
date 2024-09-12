@@ -5,76 +5,76 @@
 The AI Assist module is designed to generate improved LinkedIn posts using multiple AI models. Here's a high-level overview of the process:
 
 ```ascii
-+----------------+
-|   HTTP Request | [ASYNC]
-|    (Prompt)    |
-+--------+-------+
-         |
-         v
-+----------------+
-|  Check Cache   | [ASYNC]
-+--------+-------+
-         |
-+-------------+-------------+
-|                           |
-v                           v
-+----------------+          +----------------+
-| Return Cached  | [SYNC]   | Generate Multi | [ASYNC]
-|    Response    |          | Model Responses|
-+----------------+          +-------+--------+
-^                          |
-|                          |
-|          +---------------v---------------+
-|          |               |               |
-|          v               v               v
-|  +----------------+ +----------+  +----------------+
-|  | Retry w/Backoff| |Rate Limit|  |  Other Errors  |
-|  +--------+-------+ +----+-----+  +--------+-------+
-|           |              |                 |
-|           |              |                 |
-|           +--------------+-----------------+
-|                          |
-|                          v
-|                 +----------------+
-|                 |   Evaluate     | [SYNC]
-|                 |   Responses    |
-|                 +-------+--------+
-|                         |
-|                         v
-|                 +----------------+
-|                 | Select Best    | [SYNC]
-|                 |     Model      |
-|                 +-------+--------+
-|                         |
-|                         v
-|                 +----------------+
-|                 |    Combine     | [SYNC]
-|                 |   Responses    |
-|                 +-------+--------+
-|                         |
-|                         v
-|                 +----------------+
-|                 | Generate Final | [ASYNC]
-|                 |    Response    |
-|                 +-------+--------+
-|                         |
-|                         v
-|                 +----------------+
-|                 |  Cache Final   | [ASYNC]
-|                 |    Response    |
-|                 +-------+--------+
-|                         |
-|                         v
-|                 +----------------+
-+---------------->|  HTTP Response | [ASYNC]
-             |  (AI-generated |
-             |     content)   |
-             +----------------+
-                      ^
-                      |
-             +--------+-------+
-             |   Error Handler|
-             +----------------+
+                  +----------------+
+                  |   HTTP Request | [ASYNC]
+                  |    (Prompt)    |
+                  +--------+-------+
+                           |
+                           v
+                  +----------------+
+                  |  Check Cache   | [ASYNC]
+                  +--------+-------+
+                           |
+             +-------------+-------------+
+             |                           |
+             v                           v
+    +----------------+          +----------------+
+    | Return Cached  | [SYNC]   | Generate Multi | [ASYNC]
+    |    Response    |          | Model Responses|
+    +----------------+          +-------+--------+
+             ^                          |
+             |                          |
+             |          +---------------v---------------+
+             |          |               |               |
+             |          v               v               v
+             |  +----------------+ +----------+  +----------------+
+             |  | Retry w/Backoff| |Rate Limit|  |  Other Errors  |
+             |  +--------+-------+ +----+-----+  +--------+-------+
+             |           |              |                 |
+             |           |              |                 |
+             |           +--------------+-----------------+
+             |                          |
+             |                          v
+             |                 +----------------+
+             |                 |   Evaluate     | [SYNC]
+             |                 |   Responses    |
+             |                 +-------+--------+
+             |                         |
+             |                         v
+             |                 +----------------+
+             |                 | Select Best    | [SYNC]
+             |                 |     Model      |
+             |                 +-------+--------+
+             |                         |
+             |                         v
+             |                 +----------------+
+             |                 |    Combine     | [SYNC]
+             |                 |   Responses    |
+             |                 +-------+--------+
+             |                         |
+             |                         v
+             |                 +----------------+
+             |                 | Generate Final | [ASYNC]
+             |                 |    Response    |
+             |                 +-------+--------+
+             |                         |
+             |                         v
+             |                 +----------------+
+             |                 |  Cache Final   | [ASYNC]
+             |                 |    Response    |
+             |                 +-------+--------+
+             |                         |
+             |                         v
+             |                 +----------------+
+             +---------------->|  HTTP Response | [ASYNC]
+                               |  (AI-generated |
+                               |     content)   |
+                               +----------------+
+                                        ^
+                                        |
+                               +--------+-------+
+                               |   Error Handler|
+                               +----------------+
 ```
 
 ## What are the main steps in the process?
