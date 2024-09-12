@@ -4,22 +4,26 @@
 
 The AI Assist module is designed to generate improved LinkedIn posts using multiple AI models. Here's a high-level overview of the process:
 
+## How does the AI Assist module work?
+
+The AI Assist module is designed to generate improved LinkedIn posts using multiple AI models. Here's a high-level overview of the process:
+
 ```ascii
                   +----------------+
-                  |   HTTP Request | [ASYNC]
+                  |   HTTP Request | [ASYNC] 📡
                   |    (Prompt)    |
                   +--------+-------+
                            |
                            v
                   +----------------+
-                  |  Check Cache   | [ASYNC]
+                  |  Check Cache   | [ASYNC] 🔍
                   +--------+-------+
                            |
              +-------------+-------------+
              |                           |
              v                           v
     +----------------+          +----------------+
-    | Return Cached  | [SYNC]   | Generate Multi | [ASYNC]
+    | Return Cached  | [SYNC] 💾| Generate Multi | [ASYNC] 🤖
     |    Response    |          | Model Responses|
     +----------------+          +-------+--------+
              ^                          |
@@ -30,52 +34,67 @@ The AI Assist module is designed to generate improved LinkedIn posts using multi
              |  +----------------+ +----------+  +----------------+
              |  | Retry w/Backoff| |Rate Limit|  |  Other Errors  |
              |  +--------+-------+ +----+-----+  +--------+-------+
-             |           |              |                 |
+             |           | ⏳            | ⏱️           | ❌
              |           |              |                 |
              |           +--------------+-----------------+
              |                          |
              |                          v
              |                 +----------------+
-             |                 |   Evaluate     | [SYNC]
+             |                 |   Evaluate     | [SYNC] 📊
              |                 |   Responses    |
              |                 +-------+--------+
              |                         |
              |                         v
              |                 +----------------+
-             |                 | Select Best    | [SYNC]
+             |                 | Select Best    | [SYNC] 🏆
              |                 |     Model      |
              |                 +-------+--------+
              |                         |
              |                         v
              |                 +----------------+
-             |                 |    Combine     | [SYNC]
+             |                 |    Combine     | [SYNC] 🔗
              |                 |   Responses    |
              |                 +-------+--------+
              |                         |
              |                         v
              |                 +----------------+
-             |                 | Generate Final | [ASYNC]
+             |                 | Generate Final | [ASYNC] ✨
              |                 |    Response    |
              |                 +-------+--------+
              |                         |
              |                         v
              |                 +----------------+
-             |                 |  Cache Final   | [ASYNC]
+             |                 |  Cache Final   | [ASYNC] 💾
              |                 |    Response    |
              |                 +-------+--------+
              |                         |
              |                         v
              |                 +----------------+
-             +---------------->|  HTTP Response | [ASYNC]
+             +---------------->|  HTTP Response | [ASYNC] 📤
                                |  (AI-generated |
                                |     content)   |
                                +----------------+
                                         ^
                                         |
                                +--------+-------+
-                               |   Error Handler|
+                               |   Error Handler| 🚨
                                +----------------+
 ```
+
+Emoji Legend:
+- 📡 HTTP Request
+- 🔍 Check Cache
+- 💾 Cache operations
+- 🤖 Generate Multi Model Responses
+- ⏳ Retry with Backoff
+- ⏱️ Rate Limit
+- ❌ Other Errors
+- 📊 Evaluate Responses
+- 🏆 Select Best Model
+- 🔗 Combine Responses
+- ✨ Generate Final Response
+- 📤 HTTP Response
+- 🚨 Error Handler
 
 ## What are the main steps in the process?
 
