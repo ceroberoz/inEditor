@@ -304,11 +304,21 @@ function showNotification(message, type = "success", duration = 3000) {
         ? "bg-red-500"
         : "bg-blue-500",
   );
-  notification.classList.remove("translate-y-full");
+  notification.classList.remove(
+    "translate-y-full",
+    "opacity-0",
+    "pointer-events-none",
+  );
+  notification.classList.add("show");
 
   if (duration > 0) {
     setTimeout(() => {
-      notification.classList.add("translate-y-full");
+      notification.classList.add(
+        "translate-y-full",
+        "opacity-0",
+        "pointer-events-none",
+      );
+      notification.classList.remove("show");
     }, duration);
   }
 }
