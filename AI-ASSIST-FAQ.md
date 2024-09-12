@@ -4,10 +4,6 @@
 
 The AI Assist module is designed to generate improved LinkedIn posts using multiple AI models. Here's a high-level overview of the process:
 
-## How does the AI Assist module work?
-
-The AI Assist module is designed to generate improved LinkedIn posts using multiple AI models. Here's a high-level overview of the process:
-
 ![AI Assist process](https://github.com/ceroberoz/inEditor/blob/meong/ai-assist-process.png "AI Assist process flow")
 
 ## What are the main steps in the process?
