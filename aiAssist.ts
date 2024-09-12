@@ -8,6 +8,8 @@ await config({ export: true });
 
 const REQUIRED_ENV_VARS = [
   "OPENROUTER_API_KEY",
+  "OPENROUTER_API_KEY2",
+  "OPENROUTER_API_KEY3",
   "YOUR_SITE_URL",
   "YOUR_SITE_NAME",
 ];
@@ -17,10 +19,19 @@ for (const envVar of REQUIRED_ENV_VARS) {
   }
 }
 
+const apiKeyNames = [
+  "OPENROUTER_API_KEY",
+  "OPENROUTER_API_KEY2",
+  "OPENROUTER_API_KEY3",
+];
+
+const randomKeyName =
+  apiKeyNames[Math.floor(Math.random() * apiKeyNames.length)];
+
 // Initialize OpenAI client
 const openai = new OpenAI({
   baseURL: "https://openrouter.ai/api/v1",
-  apiKey: Deno.env.get("OPENROUTER_API_KEY"),
+  apiKey: Deno.env.get(randomKeyName),
   defaultHeaders: {
     "HTTP-Referer": Deno.env.get("YOUR_SITE_URL"),
     "X-Title": Deno.env.get("YOUR_SITE_NAME"),
