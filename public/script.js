@@ -185,6 +185,16 @@ document.addEventListener("click", (event) => {
 });
 
 // AI Assist functionality
+const aiAssistInfo = document.getElementById("ai-assist-info");
+
+function showAiAssistInfo() {
+  aiAssistInfo.classList.remove("hidden");
+}
+
+function hideAiAssistInfo() {
+  aiAssistInfo.classList.add("hidden");
+}
+
 async function getAIAssistance() {
   const aiAssistButton = document.getElementById("ai-assist-button");
   const aiAssistText = document.getElementById("ai-assist-text");
@@ -200,6 +210,9 @@ async function getAIAssistance() {
     aiAssistText.classList.add("opacity-0");
     aiAssistButton.disabled = true;
     copyButton.style.width = "60%";
+
+    // Show AI Assist Info
+    showAiAssistInfo();
 
     // Start the fun notification loop
     let notificationInterval = startFunNotificationLoop();
@@ -246,6 +259,9 @@ async function getAIAssistance() {
     aiAssistText.classList.remove("opacity-0");
     aiAssistButton.disabled = false;
     copyButton.style.width = "70%";
+
+    // Hide AI Assist Info
+    hideAiAssistInfo();
 
     // Show appropriate notification and update character count
     if (aiAssistSuccessful) {
