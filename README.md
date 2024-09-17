@@ -8,7 +8,7 @@ Hey there! Welcome to inEditor, your new buddy for creating great LinkedIn posts
 
 ## What's New?
 
-1. **Smarter AI Helper**: ![Our AI now uses multiple smart models]("https://github.com/ceroberoz/inEditor/blob/meong/AI-ASSIST-FAQ.md") to give you the best ideas.
+1. **Smarter AI Helper**: ![Our AI now uses multiple smart models](https://github.com/ceroberoz/inEditor/blob/meong/AI-ASSIST-FAQ.md) to give you the best ideas.
 2. **Better AI Suggestions**: We've made the AI even smarter at improving your posts.
 3. **Clever Idea Picking**: We use smart math to choose the best AI suggestions for you.
 4. **Detailed Notes**: We keep better track of how the AI is working to help you.
